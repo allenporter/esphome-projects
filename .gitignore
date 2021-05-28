@@ -1,4 +1,12 @@
 venv/
+secrets.yaml
+.esphome
+**/src/
+**/.pioenvs/
+**/.piolibdeps/
+**/lib/
+**/platformio.ini
+**/partitions.csv
 
 # Prerequisites
 *.d
