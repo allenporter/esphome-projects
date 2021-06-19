@@ -16,3 +16,25 @@ api:
 
 ota:
   password: !secret ota_password
+
+# The AHT10 is an i2c based temperature and humidity sensor.
+# See data sheet:
+# https://wiki.liutyi.info/download/attachments/30507639/Aosong_AHT10_en_draft_0c.pdf
+# The VIN, GND pins are connected to the esp32 on the pins of the same name.  The i2c bus
+# pins SDA and SCL pins are connected to esp32 pins 21 and 22 respectively, and configured
+# below also.
+# See https://esphome.io/components/sensor/aht10.html for details on the sensor.
+
+i2c:
+  sda: 21
+  scl: 22
+  scan: True
+  id: bus_a
+
+sensor:
+  - platform: aht10
+    temperature:
+      name: "Nook Temperature"
+    humidity:
+      name: "Nook Humidity"
+    update_interval: 60s
