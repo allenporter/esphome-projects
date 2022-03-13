@@ -1,6 +1,6 @@
-# esp8266-tutorial
+# esphome-projects
 
-Tutorial repo for leaning esp8266
+Projects related to home automation with ESPHome.
 
 # Python Virtual Environment
 
