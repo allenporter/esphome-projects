@@ -1,0 +1,23 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "timezone": "America/Los_Angeles",
+  "assignees": ["allenporter"],
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Renovate Dashboard",
+  "packageRules": [
+    {
+      "description": "Minor updates are automatic",
+      "automerge": true,
+      "automergeType": "branch",
+      "matchUpdateTypes": ["minor", "patch"],
+    },
+    {
+      "description": "Major packages updated weekly",
+      "extends": ["schedule:weekends"],
+      "additionalBranchPrefix": "major",
+      "matchUpdateTypes": ["major"],
+    }
+  ]
+}
