@@ -1,0 +1,52 @@
+# This device is a ESP32­WROOM­32. The device is connected to inputs on an All-o-matic
+# driveway gate in order to detect driveway gate open/close and pedestrian gate open/close.
+#
+# Spec: https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32_datasheet_en.pdf
+# Or see https://esp32.com/viewtopic.php?t=11904 for an easy to read pin-out
+# See http://allomatic.net/gate-operator-manuals/sliders/allomatic-dc-slide-gate-operators-manual.pdf for the all-o-matic gate.
+
+substitutions:
+  device_name: Driveway Gate
+
+esphome:
+  name: driveway-gate
+  platform: ESP32
+  board: nodemcu-32s
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API and OTA updates
+api:
+  password: !secret api_password
+
+ota:
+  password: !secret ota_password
+
+binary_sensor:
+  # A light sensor beams across the pedestrian gate, and also wired to the STOP_CMD switch. The
+  # switch registers 3.3v when the gate is opened.
+  - platform: gpio
+    name: "Pedestrian Gate"
+    device_class: door
+    pin: 2
+  # The driveway gate motor has an open limit and close limit switch connected to the board. The
+  # Close limit switch means the driveway gate is closed, and the open limit switch means that
+  # the gate is all the way open.
+  - platform: gpio
+    name: "Driveway Gate"
+    device_class: door
+    pin:
+        number: 4 
+        inverted: true
+  - platform: gpio
+    name: "Driveway Gate Full Open"
+    device_class: door
+    pin: 5
+
+    
+
