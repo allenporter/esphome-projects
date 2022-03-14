@@ -2,6 +2,7 @@
 # water softener salt levels, and an additional temperature sensor onboard just because.
 #
 # Spec: https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32_datasheet_en.pdf
+# Or see https://esp32.com/viewtopic.php?t=11904 for an easy to read pin-out
 
 substitutions:
   device_name: Water Softener
@@ -43,10 +44,12 @@ i2c:
 sensor:
   # See https://community.home-assistant.io/t/water-tank-level-and-water-volume-with-esphome/192666
   # for a community post about a similar project.
+  # TX/Echo on the sensor goes RX on the board
+  # RX/Trig on the sensor goes TX on the board
   - platform: ultrasonic
-    name: "Water Softener Ultrasonic Sensor"
-    trigger_pin: 3  # RX
-    echo_pin: 1  #TX
+    name: "${device_name} Ultrasonic Sensor"
+    trigger_pin: 17  #TX
+    echo_pin: 16  #RX
     # Set to once per minute for testing.
     update_interval: 60s
   # Temp/humidity sensor
