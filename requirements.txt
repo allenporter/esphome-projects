@@ -10,7 +10,7 @@ cffi==1.15.0
 charset-normalizer==2.0.12
 click==8.0.4
 colorama==0.4.4
-cryptography==36.0.1
+cryptography==36.0.2
 ecdsa==0.17.0
 esphome==2022.3.0
 esphome-dashboard==20220309.0
