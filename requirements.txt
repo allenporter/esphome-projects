@@ -18,7 +18,7 @@ esptool==3.2
 h11==0.13.0
 idna==3.3
 ifaddr==0.1.7
-kconfiglib==13.7.1
+kconfiglib==14.1.0
 marshmallow==3.15.0
 noiseprotocol==0.3.1
 packaging==21.3
