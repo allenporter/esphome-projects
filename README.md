@@ -16,7 +16,7 @@ See [ESPHome: Getting Started](https://esphome.io/guides/getting_started_command
 
 Create a `config/secrets.yaml` file, copying from the example then edit:
 ```
-$ cp config/secrets-example.yaml config/secrets.yaml
+$ cp config/secrets-example.yaml playground/secrets.yaml
 ```
 
 To verify config:

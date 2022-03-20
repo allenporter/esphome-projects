@@ -22,13 +22,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Verify Driveway Gate
+    - name: Configure secrets
       run: |
-        esphome sensors/driveway-gate.yaml config
-    - name: Verify Driveway Gate
+        cp config/secrets-example.yaml sensors/secrets.yaml
+        cp config/secrets-example.yaml playground/secrets.yaml
+    - name: Verify configuration files
       run: |
         declare -a config_file
         cp config/secrets-example.yaml config/secrets.yaml
-        for config_file in $(find . -maxdepth 2 -type f \( -name "*.yaml" ! -name "secrets.yaml" \) ); do
+        for config_file in $(find . -maxdepth 2 -type f \( -name "*.yaml" ! -name "secrets*.yaml" \) ); do
+            echo Verifying ${config_file}
             esphome ${config_file} config        
         done
