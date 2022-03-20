@@ -14,12 +14,17 @@ $ pip3 install -r requirements.txt
 
 See [ESPHome: Getting Started](https://esphome.io/guides/getting_started_command_line.html) for details on how to create a new node.
 
+Create a `config/secrets.yaml` file, copying from the example then edit:
+```
+$ cp config/secrets-example.yaml config/secrets.yaml
+```
+
 To verify config:
 ```
-$ esphome nook.yaml config
+$ esphome playground/nook.yaml config
 ```
 
 To upload config:
 ```
-$ esphome nook.yaml run
+$ esphome playground/nook.yaml run
 ```
