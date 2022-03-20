@@ -28,6 +28,7 @@ jobs:
     - name: Verify Driveway Gate
       run: |
         declare -a config_file
+        cp config/secrets-example.yaml config/secrets.yaml
         for config_file in $(find . -maxdepth 2 -type f \( -name "*.yaml" ! -name "secrets.yaml" \) ); do
             esphome ${config_file} config        
         done
