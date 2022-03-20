@@ -1,5 +1,6 @@
 venv/
 secrets.yaml
+config/
 .esphome
 **/src/
 **/.pioenvs/
