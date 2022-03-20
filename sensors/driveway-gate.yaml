@@ -33,7 +33,7 @@ binary_sensor:
   - platform: gpio
     name: "Pedestrian Gate"
     device_class: door
-    pin: 2
+    pin: 12
   # The driveway gate motor has an open limit and close limit switch connected to the board. The
   # Close limit switch means the driveway gate is closed, and the open limit switch means that
   # the gate is all the way open.
@@ -42,11 +42,12 @@ binary_sensor:
     device_class: door
     pin:
         number: 4 
-        inverted: true
   - platform: gpio
     name: "Driveway Gate Full Open"
     device_class: door
-    pin: 5
+    pin:
+        number: 5
+        inverted: true
 
     
 
