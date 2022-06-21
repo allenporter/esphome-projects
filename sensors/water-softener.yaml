@@ -50,14 +50,12 @@ sensor:
     name: "${device_name} Ultrasonic Sensor"
     trigger_pin: 17  #TX
     echo_pin: 16  #RX
-    # Set to once per minute for testing.
-    update_interval: 60s
+    update_interval: 15min
   # Temp/humidity sensor
   - platform: aht10
     temperature:
       name: "${device_name} Temperature"
     humidity:
       name: "${device_name} Humidity"
-    # Set to once per minute for testing.
-    update_interval: 60s
+    update_interval: 15min
 

@@ -21,10 +21,16 @@ $ cp config/secrets-example.yaml playground/secrets.yaml
 
 To verify config:
 ```
-$ esphome playground/nook.yaml config
+$ esphome config playground/nook.yaml
 ```
 
-To upload config:
+To run interactive:
 ```
-$ esphome playground/nook.yaml run
+$ esphome run playground/nook.yaml
+```
+
+To complie and upload only:
+```
+$ esphome compile playground/nook.yaml
+$ esphome upload playground/nook.yaml
 ```
