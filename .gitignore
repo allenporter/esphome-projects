@@ -1,6 +1,5 @@
 venv/
 secrets.yaml
-config/fonts
 .esphome
 **/src/
 **/.pioenvs/
