@@ -132,6 +132,9 @@ display:
     data_pin: 05
     lambda: |-
       auto time = id(ntp_time).now();
+      if (time.month == 4 && time.day_of_month == 1) {
+        time.increment_day();
+      }
       auto active = id(mode).active_index();
       if (active.value() == 1) {
         // month, day
