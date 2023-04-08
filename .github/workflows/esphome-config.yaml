@@ -25,11 +25,11 @@ jobs:
     - name: Configure secrets
       run: |
         cp config/secrets-example.yaml sensors/secrets.yaml
+        cp config/secrets-example.yaml displays/secrets.yaml
     - name: Verify configuration files
       run: |
         declare -a config_file
-        cp config/secrets-example.yaml config/secrets.yaml
         for config_file in $(find . -maxdepth 2 -type f \( -name "*.yaml" ! -name "secrets*.yaml" \) ); do
             echo Verifying ${config_file}
-            esphome ${config_file} config        
+            esphome config ${config_file}
         done
