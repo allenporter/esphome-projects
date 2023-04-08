@@ -31,5 +31,5 @@ jobs:
         declare -a config_file
         for config_file in $(find . -maxdepth 2 -type f \( -name "*.yaml" ! -name "secrets*.yaml" \) ); do
             echo Verifying ${config_file}
-            esphome ${config_file} config        
+            esphome config ${config_file}
         done
