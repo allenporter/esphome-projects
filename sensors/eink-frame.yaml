@@ -1,0 +1,45 @@
+# A Waveshare e-ink display:
+#  7.5inch 800x480
+#  https://www.waveshare.com/7.5inch-e-paper-hat.htm
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  domain: .mrv.thebends.org
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API and OTA updates
+api:
+  encryption:
+    key: !secret api_key
+
+ota:
+  password: !secret ota_password
+
+esphome:
+  name: eink-frame
+  platform: ESP32
+  board: nodemcu-32s
+
+font:
+  - file: "../config/fonts/Roboto-Regular.ttf"
+    id: font1
+    size: 32
+
+spi:
+  clk_pin: GPIO13  # CLK Yellow
+  mosi_pin: GPIO14  # DIN Blue
+
+display:
+  - platform: waveshare_epaper
+    cs_pin: GPIO15  # CS Orange
+    dc_pin: GPIO27  # DC Green
+    busy_pin: GPIO25  # BUSY Purple
+    reset_pin: GPIO26  # RST White
+    model: 7.50inV2alt
+    update_interval: 60s
+    rotation: 90° 
+    lambda: |-
+      it.printf(100, 100, id(font1), TextAlign::TOP_LEFT, "Hello World!");
