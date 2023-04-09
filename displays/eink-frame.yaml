@@ -1,16 +1,17 @@
 # A Waveshare e-ink display:
 #  7.5inch 800x480
 #  https://www.waveshare.com/7.5inch-e-paper-hat.htm
+#
+# Many of the details come from Madelena's Weatherman:
+#   https://github.com/Madelena/esphome-weatherman-dashboard
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
   domain: .mrv.thebends.org
 
-# Enable logging
 logger:
 
-# Enable Home Assistant API and OTA updates
 api:
   encryption:
     key: !secret api_key
@@ -18,15 +19,176 @@ api:
 ota:
   password: !secret ota_password
 
+json:
+
 esphome:
   name: eink-frame
   platform: ESP32
   board: nodemcu-32s
 
+sensor:
+  - platform: wifi_signal
+    name: "E-Ink Frame Wifi Signal"
+    id: wifisignal
+    unit_of_measurement: "dBm"
+    entity_category: "diagnostic"
+    update_interval: 60s
+  - platform: homeassistant
+    id: temperature
+    entity_id: sensor.weather_temperature
+
+  # Internal sensors holding parsed output of weather forecast
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_temperature_0
+    id: weather_temperature_0
+
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_temperature_1
+    id: weather_temperature_1
+
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_temperature_2
+    id: weather_temperature_2
+
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_temperature_3
+    id: weather_temperature_3
+
+
+# sensor.weather_forecast
+text_sensor:
+  - platform: homeassistant
+    id: humidity
+    entity_id: sensor.weather_humidity
+  - platform: homeassistant
+    entity_id: sensor.work_travel_time
+    id: work_travel_time
+  - platform: homeassistant
+    entity_id: sensor.school_travel_time
+    id: school_travel_time
+
+  # These internal sensors hold the parsed output of the weather forecast
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_condition_now
+    id: weather_condition_now
+
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_condition_0
+    id: weather_condition_0
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_timestamp_0
+    id: weather_timestamp_0
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_condition_1
+    id: weather_condition_1
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_timestamp_1
+    id: weather_timestamp_1
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_condition_2
+    id: weather_condition_2
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_timestamp_2
+    id: weather_timestamp_2
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_condition_3
+    id: weather_condition_3
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_timestamp_3
+    id: weather_timestamp_3
+
+graph:
+  - id: temperature_graph
+    sensor: temperature
+    duration: 5min
+    width: 300
+    height: 150
+
+time:
+  - platform: sntp
+    id: ntp_time
+    timezone: 'America/Los_Angeles'
+  
 font:
-  - file: "../config/fonts/Roboto-Regular.ttf"
-    id: font1
-    size: 32
+  - file: '../config/fonts/GothamRnd-Book.ttf'
+    id: font_small_book
+    size: 18
+  - file: '../config/fonts/GothamRnd-Bold.ttf'
+    id: font_large_bold
+    size: 108
+    glyphs: [' ', '.', '-', '°', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'F']
+  - file: '../config/fonts/GothamRnd-Bold.ttf'
+    id: font_title
+    size: 54
+  - file: '../config/fonts/GothamRnd-Bold.ttf'
+    id: font_medium_bold
+    size: 30
+  - file: '../config/fonts/GothamRnd-Bold.ttf'
+    id: font_small_bold
+    size: 22
+  - file: '../config/fonts/materialdesignicons-webfont.ttf'
+    id: font_mdi_large
+    size: 96
+    glyphs: &mdi-weather-glyphs
+      - "\U000F0590" # mdi-weather-cloudy
+      - "\U000F0F2F" # mdi-weather-cloudy-alert
+      - "\U000F0E6E" # mdi-weather-cloudy-arrow-right
+      - "\U000F0591" # mdi-weather-fog
+      - "\U000F0592" # mdi-weather-hail
+      - "\U000F0F30" # mdi-weather-hazy
+      - "\U000F0898" # mdi-weather-hurricane
+      - "\U000F0593" # mdi-weather-lightning
+      - "\U000F067E" # mdi-weather-lightning-rainy
+      - "\U000F0594" # mdi-weather-night
+      - "\U000F0F31" # mdi-weather-night-partly-cloudy
+      - "\U000F0595" # mdi-weather-partly-cloudy
+      - "\U000F0F32" # mdi-weather-partly-lightning
+      - "\U000F0F33" # mdi-weather-partly-rainy
+      - "\U000F0F34" # mdi-weather-partly-snowy
+      - "\U000F0F35" # mdi-weather-partly-snowy-rainy
+      - "\U000F0596" # mdi-weather-pouring
+      - "\U000F0597" # mdi-weather-rainy
+      - "\U000F0598" # mdi-weather-snowy
+      - "\U000F0F36" # mdi-weather-snowy-heavy
+      - "\U000F067F" # mdi-weather-snowy-rainy
+      - "\U000F0599" # mdi-weather-sunny
+      - "\U000F0F37" # mdi-weather-sunny-alert
+      - "\U000F14E4" # mdi-weather-sunny-off
+      - "\U000F059A" # mdi-weather-sunset
+      - "\U000F059B" # mdi-weather-sunset-down
+      - "\U000F059C" # mdi-weather-sunset-up
+      - "\U000F0F38" # mdi-weather-tornado
+      - "\U000F059D" # mdi-weather-windy
+      - "\U000F059E" # mdi-weather-windy-variant
+  - file: '../config/fonts/materialdesignicons-webfont.ttf'
+    id: font_mdi_medium
+    size: 36
+    glyphs: *mdi-weather-glyphs
+
+color:
+  - id: color_bg
+    red: 0%
+    green: 0%
+    blue: 0%
+    white: 0%
+  - id: color_text
+    red: 0%
+    green: 0%
+    blue: 0%
+    white: 100%
 
 spi:
   clk_pin: GPIO13  # CLK Yellow
@@ -39,7 +201,77 @@ display:
     busy_pin: GPIO25  # BUSY Purple
     reset_pin: GPIO26  # RST White
     model: 7.50inV2alt
-    update_interval: 60s
+    update_interval: 600s
     rotation: 90° 
     lambda: |-
-      it.printf(100, 100, id(font1), TextAlign::TOP_LEFT, "Hello World!");
+      // Map weather states to MDI characters.
+      std::map<std::string, std::string> weather_icon_map
+        {
+          {"cloudy", "\U000F0590"},
+          {"cloudy-alert", "\U000F0F2F"},
+          {"cloudy-arrow-right", "\U000F0E6E"},
+          {"fog", "\U000F0591"},
+          {"hail", "\U000F0592"},
+          {"hazy", "\U000F0F30"},
+          {"hurricane", "\U000F0898"},
+          {"lightning", "\U000F0593"},
+          {"lightning-rainy", "\U000F067E"},
+          {"night", "\U000F0594"},
+          {"night-partly-cloudy", "\U000F0F31"},
+          {"partlycloudy", "\U000F0595"},
+          {"partly-lightning", "\U000F0F32"},
+          {"partly-rainy", "\U000F0F33"},
+          {"partly-snowy", "\U000F0F34"},
+          {"partly-snowy-rainy", "\U000F0F35"},
+          {"pouring", "\U000F0596"},
+          {"rainy", "\U000F0597"},
+          {"snowy", "\U000F0598"},
+          {"snowy-heavy", "\U000F0F36"},
+          {"snowy-rainy", "\U000F067F"},
+          {"sunny", "\U000F0599"},
+          {"sunny-alert", "\U000F0F37"},
+          {"sunny-off", "\U000F14E4"},
+          {"sunset", "\U000F059A"},
+          {"sunset-down", "\U000F059B"},
+          {"sunset-up", "\U000F059C"},
+          {"tornado", "\U000F0F38"},
+          {"windy", "\U000F059D"},
+          {"windy-variant", "\U000F059E"},
+        };
+      
+      // Weather
+      it.printf(240, 50, id(font_title), color_text, TextAlign::TOP_CENTER, "WEATHER");
+      it.printf(100, 128, id(font_mdi_large), color_text, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_condition_now).state.c_str()].c_str());
+      it.printf(300, 128, id(font_large_bold), color_text, TextAlign::TOP_CENTER, "%2.0f°F", id(temperature).state);
+
+      // Forecasts
+      it.printf(105, 252, id(font_small_bold), color_text, TextAlign::TOP_CENTER, "%s", id(weather_timestamp_0).state.c_str());
+      it.printf(105, 276, id(font_mdi_medium), color_text, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_condition_0).state.c_str()].c_str());
+      it.printf(105, 324, id(font_small_bold), color_text, TextAlign::TOP_CENTER, "%2.0f°F", id(weather_temperature_0).state);
+
+      it.printf(195, 252, id(font_small_bold), color_text, TextAlign::TOP_CENTER, "%s", id(weather_timestamp_1).state.c_str());
+      it.printf(195, 276, id(font_mdi_medium), color_text, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_condition_1).state.c_str()].c_str());
+      it.printf(195, 324, id(font_small_bold), color_text, TextAlign::TOP_CENTER, "%2.0f°F", id(weather_temperature_1).state);
+
+      it.printf(285, 252, id(font_small_bold), color_text, TextAlign::TOP_CENTER, "%s", id(weather_timestamp_2).state.c_str());
+      it.printf(285, 276, id(font_mdi_medium), color_text, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_condition_2).state.c_str()].c_str());
+      it.printf(285, 324, id(font_small_bold), color_text, TextAlign::TOP_CENTER, "%2.0f°F", id(weather_temperature_2).state);
+
+      it.printf(375, 252, id(font_small_bold), color_text, TextAlign::TOP_CENTER, "%s", id(weather_timestamp_3).state.c_str());
+      it.printf(375, 276, id(font_mdi_medium), color_text, TextAlign::TOP_CENTER, "%s", weather_icon_map[id(weather_condition_3).state.c_str()].c_str());
+      it.printf(375, 324, id(font_small_bold), color_text, TextAlign::TOP_CENTER, "%2.0f°F", id(weather_temperature_3).state);
+
+      // Commute
+      it.printf(240, 568, id(font_title), color_text, TextAlign::TOP_CENTER, "TRAFFIC");
+      it.print(150, 634, id(font_small_bold), color_text, TextAlign::TOP_CENTER, "TO WORK");
+      it.print(330, 634, id(font_small_bold), color_text, TextAlign::TOP_CENTER, "TO SCHOOL");
+      it.printf(150, 674, id(font_medium_bold), color_text, TextAlign::TOP_CENTER, "%2s MIN", id(work_travel_time).state.c_str());
+      it.printf(330, 674, id(font_medium_bold), color_text, TextAlign::TOP_CENTER, "%2s MIN", id(school_travel_time).state.c_str());
+
+      // Refresh Timestamp
+      // Code by EnsconcE from https://community.home-assistant.io/t/esphome-show-time/348903
+      char str[17];
+      auto currTime = id(ntp_time).now().timestamp;
+      strftime(str, sizeof(str), "%I:%M %p", localtime(&currTime));
+      it.printf(460, 725, id(font_small_book), color_text, TextAlign::TOP_RIGHT, "REFRESHED AT %s", str);
+
