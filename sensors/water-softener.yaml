@@ -26,7 +26,8 @@ api:
     key: !secret api_key
 
 ota:
-  password: !secret ota_password
+  - platform: esphome
+    password: !secret ota_password
 
 
 # The AHT10 is an i2c based temperature and humidity sensor.
@@ -60,4 +61,3 @@ sensor:
     humidity:
       name: "${device_name} Humidity"
     update_interval: 15min
-
