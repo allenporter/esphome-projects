@@ -10,7 +10,7 @@
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
-  domain: .mrv.thebends.org
+  domain: !secret domain
 
 # Enable logging
 logger:
