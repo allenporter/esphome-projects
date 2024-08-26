@@ -8,7 +8,7 @@
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
-  domain: .mrv.thebends.org
+  domain: !secret domain
 
 logger:
 
@@ -17,7 +17,8 @@ api:
     key: !secret api_key
 
 ota:
-  password: !secret ota_password
+  - platform: esphome
+    password: !secret ota_password
 
 json:
 
@@ -274,4 +275,3 @@ display:
       auto currTime = id(ntp_time).now().timestamp;
       strftime(str, sizeof(str), "%I:%M %p", localtime(&currTime));
       it.printf(460, 725, id(font_small_book), color_text, TextAlign::TOP_RIGHT, "REFRESHED AT %s", str);
-
