@@ -202,8 +202,4 @@ external_components:
     components:
       - voice_assistant
       - api
-<<<<<<< HEAD
     refresh: 0s
-=======
-    refresh: 0s
->>>>>>> 0cb463d (Add m5stack voice box)
