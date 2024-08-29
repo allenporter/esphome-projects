@@ -1,6 +1,32 @@
 # https://github.com/espressif/esp-box/blob/master/docs/hardware_overview/esp32_s3_box_lite/hardware_overview_for_lite.md
 # https://github.com/esphome/firmware/blob/main/voice-assistant/esp32-s3-box.yaml
 ---
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  domain: !secret domain
+  on_connect:
+    - script.execute: draw_display
+  on_disconnect:
+    - script.execute: draw_display
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API and OTA updates
+api:
+  encryption:
+    key: !secret api_key
+  on_client_connected:
+    - script.execute: draw_display
+  on_client_disconnected:
+    - script.execute: draw_display
+
+ota:
+  - platform: esphome
+    id: ota_esphome
+    password: !secret ota_password
+
 substitutions:
   name: voice-s3-lite
   friendly_name: Voice S3 Lite
@@ -43,13 +69,6 @@ esphome:
     priority: 600
     then:
       - script.execute: draw_display
-      - delay: 30s
-      - if:
-          condition:
-            lambda: return id(init_in_progress);
-          then:
-            - lambda: id(init_in_progress) = false;
-            - script.execute: draw_display
 
 esp32:
   board: esp32s3box
@@ -70,38 +89,8 @@ external_components:
     components: esp_adf
     refresh: 0s
 
-api:
-  encryption:
-    key: !secret api_key
-  on_client_connected:
-    - script.execute: draw_display
-  on_client_disconnected:
-    - script.execute: draw_display
-
-ota:
-  - platform: esphome
-    id: ota_esphome
-    password: !secret ota_password
-
-
-update:
-  - platform: http_request
-    id: update_http_request
-    name: Firmware
-    source: https://firmware.esphome.io/voice-assistant/esp32-s3-box/manifest.json
-
-http_request:
-
-logger:
-  hardware_uart: USB_SERIAL_JTAG
-
 dashboard_import:
   package_import_url: github://esphome/firmware/voice-assistant/esp32-s3-box.yaml@main
-
-wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-  domain: !secret domain
 
 button:
   - platform: safe_mode
@@ -198,33 +187,26 @@ voice_assistant:
     - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
     - script.execute: draw_display
   on_error:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_error_phase_id};
+    - script.execute: draw_display
+    - delay: 1s
     - if:
         condition:
-          lambda: return !id(init_in_progress);
+          switch.is_off: mute
         then:
-          - lambda: id(voice_assistant_phase) = ${voice_assist_error_phase_id};
-          - script.execute: draw_display
-          - delay: 1s
-          - if:
-              condition:
-                switch.is_off: mute
-              then:
-                - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
-              else:
-                - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
-          - script.execute: draw_display
+          - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+        else:
+          - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+    - script.execute: draw_display
   on_client_connected:
     - if:
         condition:
           switch.is_off: mute
         then:
-          - wait_until:
-              not: ble.enabled
           - voice_assistant.start_continuous:
           - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
         else:
           - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
-    - lambda: id(init_in_progress) = false;
     - script.execute: draw_display
   on_client_disconnected:
     - lambda: id(voice_assistant_phase) = ${voice_assist_not_ready_phase_id};
@@ -235,54 +217,47 @@ script:
     then:
       - if:
           condition:
-            lambda: return !id(init_in_progress);
+            wifi.connected:
           then:
             - if:
                 condition:
-                  wifi.connected:
+                  api.connected:
                 then:
-                  - if:
-                      condition:
-                        api.connected:
-                      then:
-                        - lambda: |
-                            switch(id(voice_assistant_phase)) {
-                              case ${voice_assist_listening_phase_id}:
-                                id(s3_box_lcd).show_page(listening_page);
-                                id(s3_box_lcd).update();
-                                break;
-                              case ${voice_assist_thinking_phase_id}:
-                                id(s3_box_lcd).show_page(thinking_page);
-                                id(s3_box_lcd).update();
-                                break;
-                              case ${voice_assist_replying_phase_id}:
-                                id(s3_box_lcd).show_page(replying_page);
-                                id(s3_box_lcd).update();
-                                break;
-                              case ${voice_assist_error_phase_id}:
-                                id(s3_box_lcd).show_page(error_page);
-                                id(s3_box_lcd).update();
-                                break;
-                              case ${voice_assist_muted_phase_id}:
-                                id(s3_box_lcd).show_page(muted_page);
-                                id(s3_box_lcd).update();
-                                break;
-                              case ${voice_assist_not_ready_phase_id}:
-                                id(s3_box_lcd).show_page(no_ha_page);
-                                id(s3_box_lcd).update();
-                                break;
-                              default:
-                                id(s3_box_lcd).show_page(idle_page);
-                                id(s3_box_lcd).update();
-                            }
-                      else:
-                        - display.page.show: no_ha_page
-                        - component.update: s3_box_lcd
+                  - lambda: |
+                      switch(id(voice_assistant_phase)) {
+                        case ${voice_assist_listening_phase_id}:
+                          id(s3_box_lcd).show_page(listening_page);
+                          id(s3_box_lcd).update();
+                          break;
+                        case ${voice_assist_thinking_phase_id}:
+                          id(s3_box_lcd).show_page(thinking_page);
+                          id(s3_box_lcd).update();
+                          break;
+                        case ${voice_assist_replying_phase_id}:
+                          id(s3_box_lcd).show_page(replying_page);
+                          id(s3_box_lcd).update();
+                          break;
+                        case ${voice_assist_error_phase_id}:
+                          id(s3_box_lcd).show_page(error_page);
+                          id(s3_box_lcd).update();
+                          break;
+                        case ${voice_assist_muted_phase_id}:
+                          id(s3_box_lcd).show_page(muted_page);
+                          id(s3_box_lcd).update();
+                          break;
+                        case ${voice_assist_not_ready_phase_id}:
+                          id(s3_box_lcd).show_page(no_ha_page);
+                          id(s3_box_lcd).update();
+                          break;
+                        default:
+                          id(s3_box_lcd).show_page(idle_page);
+                          id(s3_box_lcd).update();
+                      }
                 else:
-                  - display.page.show: no_wifi_page
+                  - display.page.show: no_ha_page
                   - component.update: s3_box_lcd
           else:
-            - display.page.show: initializing_page
+            - display.page.show: no_wifi_page
             - component.update: s3_box_lcd
 
 switch:
@@ -300,34 +275,22 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
     entity_category: config
     on_turn_off:
+      - lambda: id(va).set_use_wake_word(true);
+      - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
       - if:
           condition:
-            lambda: return !id(init_in_progress);
+            not:
+              - voice_assistant.is_running
           then:
-            - lambda: id(va).set_use_wake_word(true);
-            - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
-            - if:
-                condition:
-                  not:
-                    - voice_assistant.is_running
-                then:
-                  - voice_assistant.start_continuous
-            - script.execute: draw_display
+            - voice_assistant.start_continuous
+      - script.execute: draw_display
     on_turn_on:
-      - if:
-          condition:
-            lambda: return !id(init_in_progress);
-          then:
-            - voice_assistant.stop
-            - lambda: id(va).set_use_wake_word(false);
-            - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
-            - script.execute: draw_display
+      - voice_assistant.stop
+      - lambda: id(va).set_use_wake_word(false);
+      - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+      - script.execute: draw_display
 
 globals:
-  - id: init_in_progress
-    type: bool
-    restore_value: false
-    initial_value: "true"
   - id: voice_assistant_phase
     type: int
     restore_value: false
