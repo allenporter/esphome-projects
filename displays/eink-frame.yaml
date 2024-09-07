@@ -22,8 +22,6 @@ ota:
 
 json:
 
-json:
-
 esphome:
   name: eink-frame
   platform: ESP32
