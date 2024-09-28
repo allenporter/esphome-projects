@@ -16,82 +16,74 @@ substitutions:
 
 esphome:
   name: camera-demo
-  # platform: ESP32
-  # board: nodemcu-32s
+  platformio_options:
+    build_flags: -DBOARD_HAS_PSRAM
+    board_build.arduino.memory_type: qio_opi
+    board_build.f_flash: 80000000L
+    board_build.flash_mode: qio
+
+# esp32:
+#   board: esp32-s3-devkitc-1
+#   framework:
+#     type: arduino
 
 esp32:
   board: esp32-s3-devkitc-1
   variant: esp32s3
+  framework:
+    type: arduino
 
-# wifi:
-#   ssid: !secret wifi_ssid
-#   password: !secret wifi_password
-#   domain: !secret domain
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  domain: !secret domain
+  # Power save to reduce heat
+  # power_save_mode: high
+  output_power: 8.5
+  # fast_connect: On
 
 # Enable logging
 logger:
 
 # Enable Home Assistant API and OTA updates
-# api:
-#   encryption:
-#     key: !secret api_key
+api:
+  encryption:
+    key: !secret api_key
 
-# ota:
-#   - platform: esphome
-#     password: !secret ota_password
+ota:
+  - platform: esphome
+    password: !secret ota_password
 
-# binary_sensor:
-#   # A light sensor beams across the pedestrian gate, and also wired to the STOP_CMD switch. The
-#   # switch registers 3.3v when the gate is opened.
-#   - platform: gpio
-#     name: "Pedestrian Gate"
-#     device_class: door
-#     pin: 12
-#   # The driveway gate motor has an open limit and close limit switch connected to the board. The
-#   # Close limit switch means the driveway gate is closed, and the open limit switch means that
-#   # the gate is all the way open.
-#   - platform: gpio
-#     name: "Driveway Gate"
-#     device_class: door
-#     pin:
-#         number: 4 
-#   - platform: gpio
-#     name: "Driveway Gate Full Open"
-#     device_class: door
-#     pin:
-#         number: 5
-#         inverted: true
-
+# Increase frequency to 800kHz https://community.home-assistant.io/t/esphome-wifi-auth-expired/443790/23?page=2
+# i2c:
+#   sda: GPIO3
+#   scl: GPIO1
+#   frequency: 800kHz
 
 esp32_camera:
   name: My Cam
   external_clock:
     pin: GPIO10  # XMCLK
-    frequency: 20MHz
+    frequency: 10MHz  # Lower from 20MHz to increase reliability  https://www.reddit.com/r/homeassistant/comments/wrqpe4/esphome_esp32_cam_reliability/
   i2c_pins:
     sda: GPIO40  # CAM_SDA
     scl: GPIO39	 # CAM_SCL
-  data_pins:
-    - GPIO12  # DVP_Y7
-    - GPIO14  # DVP_Y6
-    - GPIO16  # DVP_Y5
-    - GPIO18  # DVP_Y4
-    - GPIO11  # DVP_Y8
+  data_pins: 
     - GPIO15  # DVP_Y2
     - GPIO17  # DVP_Y3
+    - GPIO18  # DVP_Y4
+    - GPIO16  # DVP_Y5
+    - GPIO14  # DVP_Y6
+    - GPIO12  # DVP_Y7
+    - GPIO11  # DVP_Y8
     - GPIO48  # DVP_Y9
   vsync_pin: GPIO38  # DVP_VSYNC
   href_pin: GPIO47  # DVP_HREF
   pixel_clock_pin: GPIO13  # DVP_PCLK
   # Quality settings
-  max_framerate: 15 fps   
-  idle_framerate: 0.05 fps 
-  resolution: 1600x1200
+  max_framerate: 10 fps   
+  idle_framerate: 0.1 fps 
+  resolution: VGA
   jpeg_quality: 35
-
-
-
-switch:
-  - platform: gpio
-    name: "My Cam flash"
-    pin: 4
+  # Image is far too dark by default
+  brightness: 2
