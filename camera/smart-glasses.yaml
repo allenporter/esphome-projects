@@ -1,0 +1,144 @@
+# Seeed Studio XIAO ESP32 S3 Sense
+# Spec: https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/
+# - 2.4GHz Wi-Fi
+# - BLE 5.0
+# - OV2640 Camera Sensor
+# - Digital Microphone
+# - 8MB PSRAM
+# - 8MB Flash
+# - Battery Charge Supported
+# - Rich Interface
+# - IoT
+# - Embedded ML
+
+substitutions:
+  device_name: Smart Glasses
+
+esphome:
+  name: smart-glasses
+  # See configuration at https://wiki.seeedstudio.com/XIAO_ESP32S3_esphome needed
+  # to make the camera work.
+  platformio_options:
+    build_flags: -DBOARD_HAS_PSRAM
+    board_build.arduino.memory_type: qio_opi
+    board_build.f_flash: 80000000L
+    board_build.flash_mode: qio
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  framework:
+    type: arduino
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  domain: !secret domain
+  # Power save to reduce heat
+  # power_save_mode: high
+  output_power: 8.5
+
+logger:
+
+# Enable Home Assistant API and OTA updates
+api:
+  encryption:
+    key: !secret api_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+esp32_camera:
+  name: Smart Glasses
+  external_clock:
+    pin: GPIO10  # XMCLK
+    frequency: 10MHz  # Lower from 20MHz to increase reliability  https://www.reddit.com/r/homeassistant/comments/wrqpe4/esphome_esp32_cam_reliability/
+  i2c_pins:
+    sda: GPIO40  # CAM_SDA
+    scl: GPIO39	 # CAM_SCL
+  data_pins: 
+    - GPIO15  # DVP_Y2
+    - GPIO17  # DVP_Y3
+    - GPIO18  # DVP_Y4
+    - GPIO16  # DVP_Y5
+    - GPIO14  # DVP_Y6
+    - GPIO12  # DVP_Y7
+    - GPIO11  # DVP_Y8
+    - GPIO48  # DVP_Y9
+  vsync_pin: GPIO38  # DVP_VSYNC
+  href_pin: GPIO47  # DVP_HREF
+  pixel_clock_pin: GPIO13  # DVP_PCLK
+  # Quality settings
+  max_framerate: 10 fps   
+  idle_framerate: 0.5 fps 
+  resolution: 1024x768   # XGA
+  jpeg_quality: 10
+  # Image is far too dark by default
+  brightness: 2
+
+# Configuration for I2S audio
+i2s_audio:
+  i2s_lrclk_pin: GPIO46 # Note: labeled as "useless"
+  i2s_bclk_pin: GPIO42
+
+# Configuration for the microphone using I2S audio
+microphone:
+  - platform: i2s_audio
+    id: echo_microphone
+    i2s_din_pin: GPIO41
+    adc_type: external
+    pdm: true
+    # on_data:
+    #   - logger.log:
+    #       format: "Received %d mic bytes"
+    #       args: ['x.size()']
+
+# Configuration for the Voice Assistant
+voice_assistant:
+  microphone: echo_microphone
+  id: assist
+  use_wake_word: True
+  on_listening:
+    - logger.log:
+        format: "Voice Assistant Listening"
+  on_wake_word_detected:
+    - logger.log:
+        format: "Voice Assistant Wake word detected"
+  on_stt_vad_start:
+    - logger.log:
+        format: "Voice Assistant STT vad start"
+  on_start:
+    - logger.log:
+        format: "Voice Assistant started"
+  on_end:
+    - logger.log:
+        format: "Voice Assistant ended"
+  on_error:
+    - logger.log:
+        format: "Voice Assistant sterrorarted"
+
+# Switch to enable/disable the wake word
+switch:
+  - platform: template
+    name: Use wake word
+    id: use_wake_word
+    icon: mdi:ear-hearing
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    entity_category: config
+    on_turn_on:
+      - logger.log:
+          format: "Enabling wake word"
+      - lambda: id(assist).set_use_wake_word(true);
+      - if:
+          condition:
+            not:
+              - voice_assistant.is_running
+          then:
+            - voice_assistant.start_continuous
+    on_turn_off:
+      - logger.log:
+          format: "Disabling wake word"
+      - voice_assistant.stop
+      - lambda: id(assist).set_use_wake_word(false);
