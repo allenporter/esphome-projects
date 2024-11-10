@@ -403,6 +403,7 @@ display:
     cs_pin: 5
     dc_pin: 4
     reset_pin: 48
+    invert_colors: False
     update_interval: never
     pages:
       - id: idle_page
