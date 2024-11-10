@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  PYTHON_VERSION: 3.13
+
+
 jobs:
   build:
 
@@ -13,20 +17,24 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.10
+    - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.10"
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: "pip"
+        cache-dependency-path: "**/requirements.txt"
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install -r requirements_dev.txt
+
     - name: Configure secrets
       run: |
         cp config/secrets-example.yaml sensors/secrets.yaml
         cp config/secrets-example.yaml displays/secrets.yaml
         cp config/secrets-example.yaml camera/secrets.yaml
+
     - name: Verify configuration files
       run: |
         declare -a config_file
