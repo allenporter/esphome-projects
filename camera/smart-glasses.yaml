@@ -23,6 +23,7 @@ esphome:
     board_build.arduino.memory_type: qio_opi
     board_build.f_flash: 80000000L
     board_build.flash_mode: qio
+    board_build.mcu: esp32s3
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -70,8 +71,8 @@ esp32_camera:
   href_pin: GPIO47  # DVP_HREF
   pixel_clock_pin: GPIO13  # DVP_PCLK
   # Quality settings
-  max_framerate: 10 fps   
-  idle_framerate: 0.5 fps 
+  max_framerate: 30 fps   
+  idle_framerate: 0.25 fps 
   resolution: 1024x768   # XGA
   jpeg_quality: 10
   # Image is far too dark by default
@@ -79,25 +80,32 @@ esp32_camera:
 
 # Configuration for I2S audio
 i2s_audio:
-  i2s_lrclk_pin: GPIO46 # Note: labeled as "useless"
-  i2s_bclk_pin: GPIO42
-
+  # i2s_lrclk_pin: GPIO46 # Note: labeled as "useless"
+  # i2s_bclk_pin: GPIO42
+  i2s_lrclk_pin: GPIO42  # Also WS or FS
+  # i2s_bclk_pin: GPIO46
+  
 # Configuration for the microphone using I2S audio
+# Note: This is copied from the xiao website, but does not appear to work.
 microphone:
   - platform: i2s_audio
     id: echo_microphone
     i2s_din_pin: GPIO41
     adc_type: external
-    pdm: true
-    # on_data:
-    #   - logger.log:
-    #       format: "Received %d mic bytes"
-    #       args: ['x.size()']
+    pdm: False
+    # bits_per_sample: 16bit
+    channel: left
+    on_data:
+      - logger.log:
+          format: "Received %d mic bytes"
+          args: ['x.size()']
+
 
 # Configuration for the Voice Assistant
 voice_assistant:
   microphone: echo_microphone
   id: assist
+  noise_suppression_level: 2
   use_wake_word: True
   on_listening:
     - logger.log:
@@ -116,7 +124,7 @@ voice_assistant:
         format: "Voice Assistant ended"
   on_error:
     - logger.log:
-        format: "Voice Assistant sterrorarted"
+        format: "Voice Assistant error"
 
 # Switch to enable/disable the wake word
 switch:
@@ -142,3 +150,7 @@ switch:
           format: "Disabling wake word"
       - voice_assistant.stop
       - lambda: id(assist).set_use_wake_word(false);
+
+binary_sensor:
+  - platform: status
+    name: "Status"
