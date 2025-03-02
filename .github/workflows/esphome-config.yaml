@@ -54,10 +54,10 @@ jobs:
         cp config/secrets-example.yaml displays/secrets.yaml
         cp config/secrets-example.yaml camera/secrets.yaml
 
-    - name: Check Config ${matrix.config_file}
+    - name: Check Config ${{matrix.config_file}}
       run: |
-        esphome config ${matrix.config_file}
+        esphome config ${{matrix.config_file}}
   
-    - name: Check Compile ${matrix.config_file}
+    - name: Check Compile ${{matrix.config_file}}
       run: |
-        esphome compile ${matrix.config_file}
+        esphome compile ${{matrix.config_file}}
