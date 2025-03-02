@@ -24,7 +24,8 @@ json:
 
 esphome:
   name: eink-frame
-  platform: ESP32
+
+esp32:
   board: nodemcu-32s
 
 sensor:
