@@ -16,6 +16,7 @@ jobs:
     outputs:
       config: ${{ steps.config.outputs.config }}
     steps:
+    - uses: actions/checkout@v4
     - name: Define cofnig files
       id: config
       run: |
