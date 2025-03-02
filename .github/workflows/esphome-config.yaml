@@ -48,14 +48,16 @@ jobs:
       run: |
         uv pip install -r requirements.txt
   
-    - name: Configure secrets
+    - name: Prepare secrets
       run: |
         cp config/secrets-example.yaml sensors/secrets.yaml
         cp config/secrets-example.yaml displays/secrets.yaml
         cp config/secrets-example.yaml camera/secrets.yaml
 
-    - name: Verify ${matrix.config_file}
+    - name: Check Config ${matrix.config_file}
       run: |
-        echo Verifying ${matrix.config_file}
         esphome config ${matrix.config_file}
+  
+    - name: Check Compile ${matrix.config_file}
+      run: |
         esphome compile ${matrix.config_file}
