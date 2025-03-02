@@ -5,10 +5,10 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 env:
   PYTHON_VERSION: 3.12
-
 
 jobs:
   define-matrix:
@@ -20,7 +20,6 @@ jobs:
         id: config
         run: |
           echo 'config=$(scripts/find-config.sh)' >> "$GITHUB_OUTPUT"
-
 
   build:
     runs-on: ubuntu-latest
