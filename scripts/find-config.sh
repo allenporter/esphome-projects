@@ -5,4 +5,4 @@
 set -e
 
 find . -maxdepth 2 -type f \( -name "*.yaml" ! -name "secrets*.yaml" \) \
-    | jq -Rs 'rtrimstr("\n") | split("\n")'
+    | jq -Rs -c 'rtrimstr("\n") | split("\n")' 
