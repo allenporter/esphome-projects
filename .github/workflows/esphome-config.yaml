@@ -23,6 +23,8 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    needs:
+      - define-matrix
     strategy:
       matrix:
         config_file: ${{ fromJSON(needs.define-matrix.outputs.config) }}
