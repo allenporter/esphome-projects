@@ -48,8 +48,8 @@ jobs:
         cp config/secrets-example.yaml displays/secrets.yaml
         cp config/secrets-example.yaml camera/secrets.yaml
 
-    - name: Verify ${config_file
+    - name: Verify ${matrix.config_file}
       run: |
-        echo Verifying ${config_file}
-        esphome config ${config_file}
-        esphome compile ${config_file}
+        echo Verifying ${matrix.config_file}
+        esphome config ${matrix.config_file}
+        esphome compile ${matrix.config_file}
