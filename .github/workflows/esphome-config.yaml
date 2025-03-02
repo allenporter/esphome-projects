@@ -11,10 +11,22 @@ env:
 
 
 jobs:
-  build:
-
+  define-matrix:
     runs-on: ubuntu-latest
+    outputs:
+      config: ${{ steps.config.outputs.config }}
+    steps:
+      - name: Define cofnig files
+        id: config
+        run: |
+          echo 'config=$(scripts/find-config.sh)' >> "$GITHUB_OUTPUT"
 
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config_file: ${{ fromJSON(needs.define-matrix.outputs.config) }}
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
@@ -35,11 +47,8 @@ jobs:
         cp config/secrets-example.yaml displays/secrets.yaml
         cp config/secrets-example.yaml camera/secrets.yaml
 
-    - name: Verify configuration files
+    - name: Verify ${config_file
       run: |
-        declare -a config_file
-        for config_file in $(find . -maxdepth 2 -type f \( -name "*.yaml" ! -name "secrets*.yaml" \) ); do
-            echo Verifying ${config_file}
-            esphome config ${config_file}
-            esphome compile ${config_file}
-        done
+        echo Verifying ${config_file}
+        esphome config ${config_file}
+        esphome compile ${config_file}
