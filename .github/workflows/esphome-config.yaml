@@ -19,6 +19,7 @@ jobs:
     - name: Define cofnig files
       id: config
       run: |
+        echo 'config=$(scripts/find-config.sh)'
         echo 'config=$(scripts/find-config.sh)' >> "$GITHUB_OUTPUT"
 
   check-config:
