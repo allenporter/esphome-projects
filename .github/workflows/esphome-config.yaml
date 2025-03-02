@@ -19,8 +19,9 @@ jobs:
     - name: Define cofnig files
       id: config
       run: |
-        echo 'config=$(scripts/find-config.sh)'
-        echo 'config=$(scripts/find-config.sh)' >> "$GITHUB_OUTPUT"
+        CONFIG=$(scripts/find-config.sh)
+        echo ${CONFIG}
+        echo "config=${CONFIG}" >> "$GITHUB_OUTPUT"
 
   check-config:
     runs-on: ubuntu-latest
