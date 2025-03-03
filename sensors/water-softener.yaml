@@ -9,7 +9,8 @@ substitutions:
 
 esphome:
   name: water-softener
-  platform: ESP32
+
+esp32:
   board: nodemcu-32s
 
 wifi:

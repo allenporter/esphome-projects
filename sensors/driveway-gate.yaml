@@ -10,7 +10,8 @@ substitutions:
 
 esphome:
   name: driveway-gate
-  platform: ESP32
+
+esp32:
   board: nodemcu-32s
 
 wifi:
