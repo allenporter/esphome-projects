@@ -16,7 +16,7 @@ jobs:
     outputs:
       config: ${{ steps.config.outputs.config }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Define cofnig files
       id: config
       run: |
@@ -32,7 +32,7 @@ jobs:
       matrix:
         config_file: ${{ fromJSON(needs.define-matrix.outputs.config) }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Install uv
       uses: astral-sh/setup-uv@v6
       with:
