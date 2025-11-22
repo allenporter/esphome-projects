@@ -51,5 +51,5 @@ $ esphome upload playground/nook.yaml
 This will run the check and update command for a set of known devices:
 
 ```shell
-$ script/update.sh
+$ scripts/update.sh
 ```
