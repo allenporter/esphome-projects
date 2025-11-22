@@ -50,6 +50,10 @@ ota:
   - platform: esphome
     password: !secret ota_password
 
+psram:
+  mode: octal
+  speed: 80MHz
+
 esp32_camera:
   name: Smart Glasses
   external_clock:
