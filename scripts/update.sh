@@ -2,6 +2,9 @@
 
 set -e
 
+esphome compile displays/eink-panel.yaml
+esphome upload displays/eink-panel.yaml
+
 esphome compile displays/eink-frame.yaml
 esphome upload displays/eink-frame.yaml
 
