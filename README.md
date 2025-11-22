@@ -12,8 +12,8 @@ configurations to devies, which is not currently automated.
 ## Python Virtual Environment
 
 ```shell
-$ uv venv --python=13.3
-$ source venv/bin/activate
+$ uv venv --python=3.13
+$ source .venv/bin/activate
 $ uv pip install -r requirements.txt
 ```
 
