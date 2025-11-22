@@ -12,9 +12,9 @@ configurations to devies, which is not currently automated.
 ## Python Virtual Environment
 
 ```shell
-$ python3 -m venv venv
+$ uv venv --python=31.3
 $ source venv/bin/activate
-$ pip3 install -r requirements.txt
+$ uv pip install -r requirements.txt
 ```
 
 ## ESPHome Projects
