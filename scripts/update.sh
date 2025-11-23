@@ -2,8 +2,9 @@
 
 set -e
 
-esphome compile displays/eink-panel.yaml
-esphome upload displays/eink-panel.yaml
+# This device does deep sleep so it can't update OTA
+# esphome compile displays/eink-panel.yaml
+# esphome upload displays/eink-panel.yaml
 
 esphome compile displays/eink-frame.yaml
 esphome upload displays/eink-frame.yaml
