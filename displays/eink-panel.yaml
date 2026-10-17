@@ -333,7 +333,7 @@ display:
           std::string humi_str = id(humi).state.c_str();
           size_t dot_poss = humi_str.find(".");
           if (dot_poss != std::string::npos) {
-            humi_str = humi_str.substr(0, dot_pos);
+            humi_str = humi_str.substr(0, dot_poss);
           }
           it.printf(x+75,y+65, id(data_font), "%s%%", humi_str.c_str());
 
