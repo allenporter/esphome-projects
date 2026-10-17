@@ -1,2 +1,2 @@
 esphome==2025.12.7
-Pillow==11.3.0
+Pillow==13.0.0
