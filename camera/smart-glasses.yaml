@@ -54,14 +54,17 @@ psram:
   mode: octal
   speed: 80MHz
 
+i2c:
+  - id: camera_i2c
+    sda: GPIO40  # CAM_SDA
+    scl: GPIO39  # CAM_SCL
+
 esp32_camera:
   name: Smart Glasses
   external_clock:
     pin: GPIO10  # XMCLK
     frequency: 10MHz  # Lower from 20MHz to increase reliability  https://www.reddit.com/r/homeassistant/comments/wrqpe4/esphome_esp32_cam_reliability/
-  i2c_pins:
-    sda: GPIO40  # CAM_SDA
-    scl: GPIO39	 # CAM_SCL
+  i2c_id: camera_i2c
   data_pins: 
     - GPIO15  # DVP_Y2
     - GPIO17  # DVP_Y3

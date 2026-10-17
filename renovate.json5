@@ -18,6 +18,13 @@
       "extends": ["schedule:weekends"],
       "additionalBranchPrefix": "major",
       "matchUpdateTypes": ["major"],
+    },
+    {
+      "description": "Allow ESPHome CalVer year rollovers to automerge",
+      "matchPackageNames": ["esphome"],
+      "automerge": true,
+      "automergeType": "branch",
+      "matchUpdateTypes": ["major", "minor", "patch"],
     }
   ]
 }
