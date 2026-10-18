@@ -7,43 +7,67 @@ against new versions of ESPHome so I can find regressions early, well before
 attempting to update.
 
 The `scripts/` directory contains scripts for helping with pushing
-configurations to devies, which is not currently automated.
+configurations to devices, which is not currently automated.
 
 ## Python Virtual Environment
 
 ```shell
-$ uv venv --python=3.13
+$ uv venv
 $ source .venv/bin/activate
 $ uv pip install -r requirements.txt
+```
+
+## Secrets Setup
+
+Create a `secrets.yaml` file from the example and symlink it into each device directory (`camera/`, `displays/`, `sensors/`):
+
+```shell
+$ cp config/secrets-example.yaml secrets.yaml
+$ ln -s ../secrets.yaml camera/secrets.yaml
+$ ln -s ../secrets.yaml displays/secrets.yaml
+$ ln -s ../secrets.yaml sensors/secrets.yaml
 ```
 
 ## ESPHome Projects
 
 See [ESPHome: Getting Started](https://esphome.io/guides/getting_started_command_line.html) for details on how to create a new node.
 
-Create a `config/secrets.yaml` file, copying from the example then edit:
+Device configurations are organized by type:
+- `displays/`: `eink-panel.yaml`, `eink-frame.yaml`, `frekvens.yaml` (with shared UI definitions in `displays/packages/`)
+- `sensors/`: `driveway-gate.yaml`, `water-softener.yaml`
+- `camera/`: `smart-glasses.yaml`
+
+To verify a config:
 
 ```shell
-$ cp config/secrets-example.yaml playground/secrets.yaml
+$ esphome config displays/eink-frame.yaml
 ```
 
-To verify config:
+To run interactive (compile, upload, and stream logs):
 
 ```shell
-$ esphome config playground/nook.yaml
+$ esphome run displays/eink-frame.yaml
 ```
 
-To run interactive:
+To compile and upload only:
 
 ```shell
-$ esphome run playground/nook.yaml
+$ esphome compile displays/eink-frame.yaml
+$ esphome upload displays/eink-frame.yaml
 ```
 
-To complie and upload only:
+## Display Snapshot Tests
+
+Display layouts in `displays/packages/` are tested offline using ESPHome's `host` platform and `syrupy` golden PNG snapshots in `tests/`:
 
 ```shell
-$ esphome compile playground/nook.yaml
-$ esphome upload playground/nook.yaml
+$ pytest
+```
+
+To update the golden PNG snapshots after intentionally changing a display layout:
+
+```shell
+$ pytest --snapshot-update
 ```
 
 ## Update all Devices
