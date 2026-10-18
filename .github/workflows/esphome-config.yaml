@@ -77,3 +77,38 @@ jobs:
     - name: Check Compile ${{matrix.config_file}}
       run: |
         esphome compile ${{matrix.config_file}}
+
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - name: Install uv
+      uses: astral-sh/setup-uv@v10.3.0
+      with:
+        enable-cache: true
+        cache-dependency-glob: |
+          requirements**.txt
+          .python-version
+
+    - name: "Set up Python"
+      uses: actions/setup-python@v7
+      with:
+        python-version-file: ".python-version"
+
+    - name: Cache ESPHome build
+      uses: actions/cache@v6
+      with:
+        path: |
+          ~/.platformio
+          **/.esphome
+        key: ${{ runner.os }}-esphome-pytest-${{ hashFiles('.python-version', 'requirements.txt', 'displays/packages/**') }}
+        restore-keys: |
+          ${{ runner.os }}-esphome-pytest-${{ hashFiles('.python-version', 'requirements.txt') }}-
+
+    - name: Install dependencies
+      run: |
+        uv pip install -r requirements.txt
+
+    - name: Run display golden tests
+      run: |
+        pytest -v

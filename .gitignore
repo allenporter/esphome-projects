@@ -8,3 +8,5 @@ secrets.yaml
 **/platformio.ini
 **/partitions.csv
 .DS_Store
+.pytest_cache/
+__pycache__/

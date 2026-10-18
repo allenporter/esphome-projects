@@ -1,0 +1,94 @@
+substitutions:
+  font_dir: "../../config/fonts"
+  preview_weather: "sunny"
+  preview_temp: "74"
+  preview_humi: "28"
+  preview_press: "29.98"
+  preview_wind: "4.23"
+  preview_uv: "2.1222"
+  preview_uv_level: "low"
+  preview_forecast: "Expect sunny, warm weather through Tuesday, with highs in the 70s-80s. Rain is likely on Wednesday, followed by cooler, partly cloudy conditions with highs near 67°F."
+  snapshot_filename: "eink-panel-preview.bmp"
+
+esphome:
+  name: eink-panel-preview
+  includes:
+    - eink-panel-preview.h
+  platformio_options:
+    build_flags:
+      - "-Wl,--wrap=time"
+  on_boot:
+    priority: -100
+    then:
+      - text_sensor.template.publish:
+          id: myWeather
+          state: !lambda 'return preview_env_or("PREVIEW_WEATHER", "${preview_weather}");'
+      - text_sensor.template.publish:
+          id: temp
+          state: !lambda 'return preview_env_or("PREVIEW_TEMP", "${preview_temp}");'
+      - text_sensor.template.publish:
+          id: humi
+          state: !lambda 'return preview_env_or("PREVIEW_HUMI", "${preview_humi}");'
+      - text_sensor.template.publish:
+          id: press
+          state: !lambda 'return preview_env_or("PREVIEW_PRESS", "${preview_press}");'
+      - text_sensor.template.publish:
+          id: wind
+          state: !lambda 'return preview_env_or("PREVIEW_WIND", "${preview_wind}");'
+      - text_sensor.template.publish:
+          id: uv
+          state: !lambda 'return preview_env_or("PREVIEW_UV", "${preview_uv}");'
+      - text_sensor.template.publish:
+          id: uv_level
+          state: !lambda 'return preview_env_or("PREVIEW_UV_LEVEL", "${preview_uv_level}");'
+      - text_sensor.template.publish:
+          id: forecast
+          state: !lambda 'return preview_env_or("PREVIEW_FORECAST", "${preview_forecast}");'
+      - component.update: display_panel
+      - snapshot.take:
+          id: display_panel
+          filename: "${snapshot_filename}"
+      - lambda: |-
+          std::exit(0);
+
+host:
+
+logger:
+  level: INFO
+
+globals:
+  - id: wifi_status
+    type: int
+    restore_value: no
+    initial_value: '1'
+
+time:
+  - platform: host
+    id: homeassistant_time
+    timezone: "UTC"
+
+text_sensor:
+  - platform: template
+    id: myWeather
+  - platform: template
+    id: temp
+  - platform: template
+    id: humi
+  - platform: template
+    id: press
+  - platform: template
+    id: wind
+  - platform: template
+    id: uv
+  - platform: template
+    id: uv_level
+  - platform: template
+    id: forecast
+
+packages:
+  display_ui: !include eink-panel-display.yaml
+
+display:
+  - platform: snapshot
+    id: display_panel
+    dimensions: 800x480
