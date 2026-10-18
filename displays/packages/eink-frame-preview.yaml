@@ -130,13 +130,8 @@ text_sensor:
   - platform: template
     id: weather_timestamp_3
 
-color:
-  - id: !extend color_text
-    red: 100%
-    green: 100%
-    blue: 100%
-
 display:
+  # Physical 800x480 panel is mounted in portrait orientation (rotation: 90°)
   - platform: snapshot
     id: display_frame
     dimensions: 480x800
