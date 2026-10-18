@@ -84,6 +84,9 @@ interval:
             - lambda: |-
                 ESP_LOGD("Display", "Triggered Display Update...");
             - component.update: display_panel
+            - component.update: wifisignal
+            - component.update: internal_temp
+            - component.update: uptime_sensor
             - if:
                 condition:
                   lambda: |-
@@ -106,6 +109,16 @@ sensor:
     name: "Wifi Signal"
     id: wifisignal
     unit_of_measurement: "dBm"
+    entity_category: "diagnostic"
+    update_interval: 60s
+  - platform: internal_temperature
+    name: "Internal Temperature"
+    id: internal_temp
+    entity_category: "diagnostic"
+    update_interval: 60s
+  - platform: uptime
+    name: "Uptime"
+    id: uptime_sensor
     entity_category: "diagnostic"
     update_interval: 60s
 
