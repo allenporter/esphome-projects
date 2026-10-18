@@ -13,4 +13,4 @@ def test_eink_panel_default_render(
     snapshot_png: SnapshotAssertion,
 ) -> None:
     """Verify eink-panel rendering against the syrupy PNG snapshot."""
-    assert render_display_png("displays/packages/eink-panel-preview.yaml") == snapshot_png
+    assert render_display_png("tests/eink-panel-preview.yaml") == snapshot_png

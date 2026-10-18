@@ -1,20 +1,17 @@
-substitutions:
-  font_dir: "../config/fonts"
-
 font:
-  - file: "${font_dir}/Montserrat-Black.ttf"
+  - file: "../config/fonts/Montserrat-Black.ttf"
     id: web_font
     size: 20
-  - file: "${font_dir}/Montserrat-Black.ttf"
+  - file: "../config/fonts/Montserrat-Black.ttf"
     id: data_font
     size: 30
-  - file: "${font_dir}/Montserrat-Black.ttf"
+  - file: "../config/fonts/Montserrat-Black.ttf"
     id: sensor_font
     size: 22
-  - file: "${font_dir}/Montserrat-Black.ttf"
+  - file: "../config/fonts/Montserrat-Black.ttf"
     id: title_font
     size: 40
-  - file: "${font_dir}/Montserrat-Black.ttf"
+  - file: "../config/fonts/Montserrat-Black.ttf"
     id: update_font
     size: 18
 
@@ -22,7 +19,7 @@ font:
     id: font1
     size: 24
 
-  - file: "${font_dir}/materialdesignicons-webfont.ttf"
+  - file: "../config/fonts/materialdesignicons-webfont.ttf"
     id: font_mdi_large
     size: 200
     glyphs: &mdi-weather-glyphs # https://pictogrammers.com/library/mdi/
@@ -34,11 +31,11 @@ font:
       - "\U000F0596" # Rainy weather
       - "\U000F0598" # Snowy weather
       - "\U000F0599" # Sunny weather
-  - file: "${font_dir}/materialdesignicons-webfont.ttf"
+  - file: "../config/fonts/materialdesignicons-webfont.ttf"
     id: font_weather
     size: 200
     glyphs: *mdi-weather-glyphs
-  - file: "${font_dir}/materialdesignicons-webfont.ttf"
+  - file: "../config/fonts/materialdesignicons-webfont.ttf"
     id: img_font_sensor
     size: 70
     glyphs: *mdi-weather-glyphs

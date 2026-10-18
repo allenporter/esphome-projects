@@ -1,24 +1,21 @@
-substitutions:
-  font_dir: "../config/fonts"
-
 font:
-  - file: '${font_dir}/GothamRnd-Book.ttf'
+  - file: '../config/fonts/GothamRnd-Book.ttf'
     id: font_small_book
     size: 18
-  - file: '${font_dir}/GothamRnd-Bold.ttf'
+  - file: '../config/fonts/GothamRnd-Bold.ttf'
     id: font_large_bold
     size: 108
     glyphs: [' ', '.', '-', '°', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'F']
-  - file: '${font_dir}/GothamRnd-Bold.ttf'
+  - file: '../config/fonts/GothamRnd-Bold.ttf'
     id: font_title
     size: 54
-  - file: '${font_dir}/GothamRnd-Bold.ttf'
+  - file: '../config/fonts/GothamRnd-Bold.ttf'
     id: font_medium_bold
     size: 30
-  - file: '${font_dir}/GothamRnd-Bold.ttf'
+  - file: '../config/fonts/GothamRnd-Bold.ttf'
     id: font_small_bold
     size: 22
-  - file: '${font_dir}/materialdesignicons-webfont.ttf'
+  - file: '../config/fonts/materialdesignicons-webfont.ttf'
     id: font_mdi_large
     size: 96
     glyphs: &mdi-weather-glyphs
@@ -52,7 +49,7 @@ font:
       - "\U000F0F38" # mdi-weather-tornado
       - "\U000F059D" # mdi-weather-windy
       - "\U000F059E" # mdi-weather-windy-variant
-  - file: '${font_dir}/materialdesignicons-webfont.ttf'
+  - file: '../config/fonts/materialdesignicons-webfont.ttf'
     id: font_mdi_medium
     size: 36
     glyphs: *mdi-weather-glyphs
