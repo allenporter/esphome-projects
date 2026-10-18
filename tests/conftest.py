@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 
 from PIL import Image, ImageOps
 import pytest
@@ -54,25 +55,30 @@ def compile_preview() -> Callable[[Path | str], Path]:
 def render_display_png(
     compile_preview: Callable[[Path | str], Path],
     tmp_path: Path,
-) -> Callable[[Path | str], bytes]:
-    """Compile and run an ESPHome host preview config and return inverted e-paper PNG bytes."""
+) -> Callable[..., bytes]:
+    """Compile and run an ESPHome host preview config and return PNG bytes."""
 
-    def _render(config_file: Path | str) -> bytes:
+    def _render(config_file: Path | str, *, invert: bool = True) -> bytes:
         program = compile_preview(config_file)
-        env = os.environ.copy()
-        env["ESPHOME_SNAPSHOT_DIR"] = str(tmp_path)
-        env["TZ"] = "UTC"
+        with tempfile.TemporaryDirectory(dir=tmp_path) as snapshot_dir:
+            env = os.environ.copy()
+            env["ESPHOME_SNAPSHOT_DIR"] = snapshot_dir
+            env["TZ"] = "UTC"
 
-        subprocess.run([str(program)], cwd=REPO_ROOT, env=env, check=True)
+            subprocess.run([str(program)], cwd=REPO_ROOT, env=env, check=True)
 
-        bmp_files = list(tmp_path.glob("*.bmp"))
-        assert len(bmp_files) == 1, f"Expected 1 BMP snapshot in {tmp_path}, found {bmp_files}"
+            bmp_files = list(Path(snapshot_dir).glob("*.bmp"))
+            assert len(bmp_files) == 1, (
+                f"Expected 1 BMP snapshot in {snapshot_dir}, found {bmp_files}"
+            )
 
-        with Image.open(bmp_files[0]) as img:
-            # Invert RGB so COLOR_ON renders as black ink on white paper
-            eink_img = ImageOps.invert(img.convert("RGB"))
-            buf = io.BytesIO()
-            eink_img.save(buf, format="PNG")
-            return buf.getvalue()
+            with Image.open(bmp_files[0]) as img:
+                rgb_img = img.convert("RGB")
+                if invert:
+                    # Invert RGB so COLOR_ON renders as black ink on white paper
+                    rgb_img = ImageOps.invert(rgb_img)
+                buf = io.BytesIO()
+                rgb_img.save(buf, format="PNG")
+                return buf.getvalue()
 
     return _render
