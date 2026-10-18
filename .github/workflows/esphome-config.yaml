@@ -60,7 +60,7 @@ jobs:
       uses: actions/cache@v6
       with:
         path: "**/.esphome"
-        key: ${{ runner.os }}-esphome-build-${{ matrix.config_file }}-${{ hashFiles('.python-version', 'requirements.txt', matrix.config_file) }}
+        key: ${{ runner.os }}-esphome-build-${{ matrix.config_file }}-${{ hashFiles('.python-version', 'requirements.txt', matrix.config_file, 'displays/packages/**') }}
         restore-keys: |
           ${{ runner.os }}-esphome-build-${{ matrix.config_file }}-${{ hashFiles('.python-version', 'requirements.txt') }}-
 
@@ -101,7 +101,7 @@ jobs:
         path: |
           ~/.platformio
           **/.esphome
-        key: ${{ runner.os }}-esphome-pytest-${{ hashFiles('.python-version', 'requirements.txt', 'displays/packages/**') }}
+        key: ${{ runner.os }}-esphome-pytest-${{ hashFiles('.python-version', 'requirements.txt', 'displays/packages/**', 'tests/**') }}
         restore-keys: |
           ${{ runner.os }}-esphome-pytest-${{ hashFiles('.python-version', 'requirements.txt') }}-
 
