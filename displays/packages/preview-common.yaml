@@ -1,0 +1,11 @@
+esphome:
+  includes:
+    - preview-time.h
+  platformio_options:
+    build_flags:
+      - "-Wl,--wrap=time"
+
+host:
+
+logger:
+  level: INFO

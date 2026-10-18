@@ -20,13 +20,12 @@ substitutions:
   preview_school_travel_time: "12"
   snapshot_filename: "eink-frame-preview.bmp"
 
+packages:
+  preview_common: !include preview-common.yaml
+  display_ui: !include eink-frame-display.yaml
+
 esphome:
   name: eink-frame-preview
-  includes:
-    - eink-panel-preview.h
-  platformio_options:
-    build_flags:
-      - "-Wl,--wrap=time"
   on_boot:
     priority: -100
     then:
@@ -89,11 +88,6 @@ esphome:
       - lambda: |-
           std::exit(0);
 
-host:
-
-logger:
-  level: INFO
-
 time:
   - platform: host
     id: ntp_time
@@ -136,9 +130,6 @@ text_sensor:
     id: weather_condition_3
   - platform: template
     id: weather_timestamp_3
-
-packages:
-  display_ui: !include eink-frame-display.yaml
 
 color:
   - id: !extend color_text
