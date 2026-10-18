@@ -4,5 +4,6 @@
 
 set -e
 
-find . -maxdepth 2 -type f \( -name "*.yaml" ! -name "secrets*.yaml" \) \
-    | jq -Rs -c 'rtrimstr("\n") | split("\n")' 
+find camera displays sensors -maxdepth 1 -type f \( -name "*.yaml" ! -name "secrets*.yaml" \) \
+    | sort \
+    | jq -Rs -c 'rtrimstr("\n") | split("\n")'

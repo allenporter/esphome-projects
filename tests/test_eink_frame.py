@@ -13,4 +13,4 @@ def test_eink_frame_default_render(
     snapshot_png: SnapshotAssertion,
 ) -> None:
     """Verify eink-frame rendering against the syrupy PNG snapshot."""
-    assert render_display_png("displays/packages/eink-frame-preview.yaml") == snapshot_png
+    assert render_display_png("tests/eink-frame-preview.yaml") == snapshot_png

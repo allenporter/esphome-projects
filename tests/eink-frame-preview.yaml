@@ -1,5 +1,4 @@
 substitutions:
-  font_dir: "../../config/fonts"
   preview_time: "2026-10-18 14:00:00"
   preview_temperature: "74.0"
   preview_humidity: "28"
@@ -22,7 +21,7 @@ substitutions:
 
 packages:
   preview_common: !include preview-common.yaml
-  display_ui: !include eink-frame-display.yaml
+  display_ui: !include ../displays/packages/eink-frame-display.yaml
 
 esphome:
   name: eink-frame-preview
