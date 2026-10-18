@@ -1,0 +1,144 @@
+substitutions:
+  font_dir: "../../config/fonts"
+  preview_time: "2026-10-18 14:00:00"
+  preview_temperature: "74.0"
+  preview_humidity: "28"
+  preview_weather_condition_now: "sunny"
+  preview_weather_condition_0: "sunny"
+  preview_weather_timestamp_0: "3 PM"
+  preview_weather_temperature_0: "76.0"
+  preview_weather_condition_1: "partlycloudy"
+  preview_weather_timestamp_1: "4 PM"
+  preview_weather_temperature_1: "72.0"
+  preview_weather_condition_2: "cloudy"
+  preview_weather_timestamp_2: "5 PM"
+  preview_weather_temperature_2: "68.0"
+  preview_weather_condition_3: "sunset"
+  preview_weather_timestamp_3: "6 PM"
+  preview_weather_temperature_3: "64.0"
+  preview_work_travel_time: "24"
+  preview_school_travel_time: "12"
+  snapshot_filename: "eink-frame-preview.bmp"
+
+packages:
+  preview_common: !include preview-common.yaml
+  display_ui: !include eink-frame-display.yaml
+
+esphome:
+  name: eink-frame-preview
+  on_boot:
+    priority: -100
+    then:
+      - lambda: 'set_preview_time("${preview_time}");'
+      - sensor.template.publish:
+          id: temperature
+          state: ${preview_temperature}
+      - sensor.template.publish:
+          id: weather_temperature_0
+          state: ${preview_weather_temperature_0}
+      - sensor.template.publish:
+          id: weather_temperature_1
+          state: ${preview_weather_temperature_1}
+      - sensor.template.publish:
+          id: weather_temperature_2
+          state: ${preview_weather_temperature_2}
+      - sensor.template.publish:
+          id: weather_temperature_3
+          state: ${preview_weather_temperature_3}
+      - text_sensor.template.publish:
+          id: humidity
+          state: "${preview_humidity}"
+      - text_sensor.template.publish:
+          id: work_travel_time
+          state: "${preview_work_travel_time}"
+      - text_sensor.template.publish:
+          id: school_travel_time
+          state: "${preview_school_travel_time}"
+      - text_sensor.template.publish:
+          id: weather_condition_now
+          state: "${preview_weather_condition_now}"
+      - text_sensor.template.publish:
+          id: weather_condition_0
+          state: "${preview_weather_condition_0}"
+      - text_sensor.template.publish:
+          id: weather_timestamp_0
+          state: "${preview_weather_timestamp_0}"
+      - text_sensor.template.publish:
+          id: weather_condition_1
+          state: "${preview_weather_condition_1}"
+      - text_sensor.template.publish:
+          id: weather_timestamp_1
+          state: "${preview_weather_timestamp_1}"
+      - text_sensor.template.publish:
+          id: weather_condition_2
+          state: "${preview_weather_condition_2}"
+      - text_sensor.template.publish:
+          id: weather_timestamp_2
+          state: "${preview_weather_timestamp_2}"
+      - text_sensor.template.publish:
+          id: weather_condition_3
+          state: "${preview_weather_condition_3}"
+      - text_sensor.template.publish:
+          id: weather_timestamp_3
+          state: "${preview_weather_timestamp_3}"
+      - component.update: display_frame
+      - snapshot.take:
+          id: display_frame
+          filename: "${snapshot_filename}"
+      - lambda: |-
+          std::exit(0);
+
+time:
+  - platform: host
+    id: ntp_time
+    timezone: "UTC"
+
+sensor:
+  - platform: template
+    id: temperature
+  - platform: template
+    id: weather_temperature_0
+  - platform: template
+    id: weather_temperature_1
+  - platform: template
+    id: weather_temperature_2
+  - platform: template
+    id: weather_temperature_3
+
+text_sensor:
+  - platform: template
+    id: humidity
+  - platform: template
+    id: work_travel_time
+  - platform: template
+    id: school_travel_time
+  - platform: template
+    id: weather_condition_now
+  - platform: template
+    id: weather_condition_0
+  - platform: template
+    id: weather_timestamp_0
+  - platform: template
+    id: weather_condition_1
+  - platform: template
+    id: weather_timestamp_1
+  - platform: template
+    id: weather_condition_2
+  - platform: template
+    id: weather_timestamp_2
+  - platform: template
+    id: weather_condition_3
+  - platform: template
+    id: weather_timestamp_3
+
+color:
+  - id: !extend color_text
+    red: 100%
+    green: 100%
+    blue: 100%
+
+display:
+  - platform: snapshot
+    id: display_frame
+    dimensions: 480x800
+    update_interval: never

@@ -11,13 +11,12 @@ substitutions:
   preview_forecast: "Expect sunny, warm weather through Tuesday, with highs in the 70s-80s. Rain is likely on Wednesday, followed by cooler, partly cloudy conditions with highs near 67°F."
   snapshot_filename: "eink-panel-preview.bmp"
 
+packages:
+  preview_common: !include preview-common.yaml
+  display_ui: !include eink-panel-display.yaml
+
 esphome:
   name: eink-panel-preview
-  includes:
-    - eink-panel-preview.h
-  platformio_options:
-    build_flags:
-      - "-Wl,--wrap=time"
   on_boot:
     priority: -100
     then:
@@ -53,11 +52,6 @@ esphome:
       - lambda: |-
           std::exit(0);
 
-host:
-
-logger:
-  level: INFO
-
 globals:
   - id: wifi_status
     type: int
@@ -86,9 +80,6 @@ text_sensor:
     id: uv_level
   - platform: template
     id: forecast
-
-packages:
-  display_ui: !include eink-panel-display.yaml
 
 display:
   - platform: snapshot
