@@ -226,7 +226,9 @@ display:
     id: display_panel
     cs_pin: GPIO3
     dc_pin: GPIO5
-    busy_pin: GPIO4
+    busy_pin:
+      number: GPIO4
+      inverted: true
     reset_pin: GPIO2
     model: 7.50inv2
     update_interval: never # Never -- handled by interval script
