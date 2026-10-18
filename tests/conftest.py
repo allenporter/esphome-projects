@@ -15,7 +15,6 @@ from syrupy.assertion import SnapshotAssertion
 from syrupy.extensions.image import PNGImageSnapshotExtension
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-PACKAGES_DIR = REPO_ROOT / "displays" / "packages"
 
 
 @pytest.fixture
@@ -25,50 +24,51 @@ def snapshot_png(snapshot: SnapshotAssertion) -> SnapshotAssertion:
 
 
 @pytest.fixture(scope="session")
-def compile_preview() -> Callable[[str], Path]:
+def compile_preview() -> Callable[[Path | str], Path]:
     """Session-scoped compiler cache for ESPHome host preview configurations."""
-    compiled: dict[str, Path] = {}
+    compiled: dict[Path, Path] = {}
 
-    def _compile(preview_name: str) -> Path:
-        if preview_name not in compiled:
-            config_path = PACKAGES_DIR / f"{preview_name}.yaml"
+    def _compile(config_file: Path | str) -> Path:
+        config_path = (REPO_ROOT / config_file).resolve()
+        if config_path not in compiled:
             cmd = [sys.executable, "-m", "esphome", "compile", str(config_path)]
             subprocess.run(cmd, cwd=REPO_ROOT, check=True)
+            name = config_path.stem
             program = (
-                PACKAGES_DIR
+                config_path.parent
                 / ".esphome"
                 / "build"
-                / preview_name
+                / name
                 / ".pioenvs"
-                / preview_name
+                / name
                 / "program"
             )
             assert program.exists(), f"Compiled host binary not found at {program}"
-            compiled[preview_name] = program
-        return compiled[preview_name]
+            compiled[config_path] = program
+        return compiled[config_path]
 
     return _compile
 
 
 @pytest.fixture
 def render_display_png(
-    compile_preview: Callable[[str], Path],
+    compile_preview: Callable[[Path | str], Path],
     tmp_path: Path,
-) -> Callable[[str], bytes]:
+) -> Callable[[Path | str], bytes]:
     """Compile and run an ESPHome host preview config and return inverted e-paper PNG bytes."""
 
-    def _render(preview_name: str) -> bytes:
-        program = compile_preview(preview_name)
+    def _render(config_file: Path | str) -> bytes:
+        program = compile_preview(config_file)
         env = os.environ.copy()
         env["ESPHOME_SNAPSHOT_DIR"] = str(tmp_path)
         env["TZ"] = "UTC"
 
         subprocess.run([str(program)], cwd=REPO_ROOT, env=env, check=True)
 
-        bmp_path = tmp_path / f"{preview_name}.bmp"
-        assert bmp_path.exists(), f"Snapshot BMP was not created at {bmp_path}"
+        bmp_files = list(tmp_path.glob("*.bmp"))
+        assert len(bmp_files) == 1, f"Expected 1 BMP snapshot in {tmp_path}, found {bmp_files}"
 
-        with Image.open(bmp_path) as img:
+        with Image.open(bmp_files[0]) as img:
             # Invert RGB so COLOR_ON renders as black ink on white paper
             eink_img = ImageOps.invert(img.convert("RGB"))
             buf = io.BytesIO()
