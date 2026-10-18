@@ -144,7 +144,12 @@ display:
           it.printf(x+10, y+10, id(sensor_font), "UV Index");
           it.printf(x+45, y+75, id(img_font_sensor), TextAlign::CENTER, "\U000F0599");
           // Get UV index data. Print the numeric value and text value.
-          it.printf(x+85,y+50, id(data_font), "%s", id(uv).state.c_str());
+          std::string uv_str = id(uv).state.c_str();
+          size_t uv_dot_pos = uv_str.find(".");
+          if (uv_dot_pos != std::string::npos) {
+            uv_str = uv_str.substr(0, uv_dot_pos + 2);
+          }
+          it.printf(x+85,y+50, id(data_font), "%s", uv_str.c_str());
           it.printf(x+85,y+78, id(sensor_font), "%s", id(uv_level).state.c_str());
 
           // Draw four borders
