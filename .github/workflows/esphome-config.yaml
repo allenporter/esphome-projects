@@ -41,7 +41,9 @@ jobs:
       uses: astral-sh/setup-uv@v10.3.0
       with:
         enable-cache: true
-        cache-dependency-glob: "requirements**.txt"
+        cache-dependency-glob: |
+          requirements**.txt
+          .python-version
 
     - name: "Set up Python"
       uses: actions/setup-python@v7
