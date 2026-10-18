@@ -27,9 +27,8 @@ packages:
 esphome:
   name: eink-frame-preview
   on_boot:
-    priority: -100
-    then:
-      - lambda: 'set_preview_time("${preview_time}");'
+    - priority: -100
+      then:
       - sensor.template.publish:
           id: temperature
           state: ${preview_temperature}
