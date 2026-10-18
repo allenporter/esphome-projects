@@ -1,5 +1,6 @@
 substitutions:
   font_dir: "../../config/fonts"
+  preview_time: "2026-10-18 14:00:00"
   preview_weather: "sunny"
   preview_temp: "74"
   preview_humi: "28"
@@ -20,30 +21,31 @@ esphome:
   on_boot:
     priority: -100
     then:
+      - lambda: 'set_preview_time("${preview_time}");'
       - text_sensor.template.publish:
           id: myWeather
-          state: !lambda 'return preview_env_or("PREVIEW_WEATHER", "${preview_weather}");'
+          state: "${preview_weather}"
       - text_sensor.template.publish:
           id: temp
-          state: !lambda 'return preview_env_or("PREVIEW_TEMP", "${preview_temp}");'
+          state: "${preview_temp}"
       - text_sensor.template.publish:
           id: humi
-          state: !lambda 'return preview_env_or("PREVIEW_HUMI", "${preview_humi}");'
+          state: "${preview_humi}"
       - text_sensor.template.publish:
           id: press
-          state: !lambda 'return preview_env_or("PREVIEW_PRESS", "${preview_press}");'
+          state: "${preview_press}"
       - text_sensor.template.publish:
           id: wind
-          state: !lambda 'return preview_env_or("PREVIEW_WIND", "${preview_wind}");'
+          state: "${preview_wind}"
       - text_sensor.template.publish:
           id: uv
-          state: !lambda 'return preview_env_or("PREVIEW_UV", "${preview_uv}");'
+          state: "${preview_uv}"
       - text_sensor.template.publish:
           id: uv_level
-          state: !lambda 'return preview_env_or("PREVIEW_UV_LEVEL", "${preview_uv_level}");'
+          state: "${preview_uv_level}"
       - text_sensor.template.publish:
           id: forecast
-          state: !lambda 'return preview_env_or("PREVIEW_FORECAST", "${preview_forecast}");'
+          state: "${preview_forecast}"
       - component.update: display_panel
       - snapshot.take:
           id: display_panel

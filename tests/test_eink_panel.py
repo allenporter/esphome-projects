@@ -42,17 +42,10 @@ def eink_panel_program() -> Path:
     return program
 
 
-def render_eink_panel_png(
-    program: Path,
-    tmp_path: Path,
-    env_overrides: dict[str, str] | None = None,
-) -> bytes:
+def render_eink_panel_png(program: Path, tmp_path: Path) -> bytes:
     """Run the compiled host binary and return the rendered e-paper PNG bytes."""
     env = os.environ.copy()
     env["ESPHOME_SNAPSHOT_DIR"] = str(tmp_path)
-    env["TZ"] = "UTC"
-    if env_overrides:
-        env.update(env_overrides)
 
     subprocess.run([str(program)], cwd=REPO_ROOT, env=env, check=True)
 
