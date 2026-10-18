@@ -60,45 +60,45 @@ wifi:
 
 deep_sleep:
   id: deep_sleep_1
-  run_duration: 1min #10min  # Device wake up and run 60s (enough to pull data and update)
+  run_duration: 90s  # Fallback timeout if Wi-Fi or Home Assistant is unreachable
   sleep_duration: 30min  # deep sleep for 30min
 
 interval:
-  # Deep sleep
-  - interval: 59s  # run this command before the end of run_duration
-    then:
-      - logger.log: "Entering deep sleep now momentarily..."
-
-  # Sleep after 11:55PM until 07:30AM
-  - interval: 10s
-    then:
-      - if:
-          condition:
-            lambda: |-
-              auto now = id(homeassistant_time).now();
-              ESP_LOGD("main", "Evaluating");
-              return now.is_valid() && now.hour == 00;
-          then:
-            - logger.log: "After 12:00AM — entering deep sleep until 06:00."
-            - deep_sleep.enter:
-                id: deep_sleep_1
-                until: "06:00:00"
-                time_id: homeassistant_time
-
-  # Condition: wifi connected && data retrieved && first time
-  - interval: 10s  # Check every second
+  # Wait for Wi-Fi, Home Assistant API, time sync, and weather state before updating
+  - interval: 1s
     then:
       - if:
           condition:
             and:
               - wifi.connected:
-              - lambda: "return !id(update_done);"
+              - api.connected:
+              - lambda: |-
+                  return !id(update_done) &&
+                         id(homeassistant_time).now().is_valid() &&
+                         id(myWeather).has_state() &&
+                         id(forecast).has_state();
           then:
-            - delay: 5s
+            - lambda: "id(update_done) = true;"
+            # Brief delay so remaining Home Assistant entity states finish arriving
+            - delay: 2s
             - lambda: |-
                 ESP_LOGD("Display", "Triggered Display Update...");
             - component.update: display_panel
-            - lambda: "id(update_done) = true;"
+            - if:
+                condition:
+                  lambda: |-
+                    auto now = id(homeassistant_time).now();
+                    return now.is_valid() && now.hour < 6;
+                then:
+                  - logger.log: "Between 12:00AM and 06:00AM — entering deep sleep until 06:00."
+                  - deep_sleep.enter:
+                      id: deep_sleep_1
+                      until: "06:00:00"
+                      time_id: homeassistant_time
+                else:
+                  - logger.log: "Display update complete — entering deep sleep for 30min."
+                  - deep_sleep.enter:
+                      id: deep_sleep_1
 
 
 sensor:
@@ -258,31 +258,10 @@ display:
           }
 
           auto time_now = id(homeassistant_time).now();
-          int day = time_now.day_of_month;
-          int day_of_week = time_now.day_of_week;
-          int month = time_now.month;
-
-          // Month conversion
-          const char* months[] = {
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-          };
-          const char* month_str = months[month - 1];  // Month index starts from 0
-
-          // Draw the date
-          ESP_LOGD("Display", "Month: %s", month_str);
-          ESP_LOGD("Display", "Day: %d", day);
-          it.printf(250, 85, id(title_font), "%s %d", month_str, day);
-
-          // Get the day of the week
-          const char* weekdays[] = {
-              "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-              "Saturday",
-          };
-          const char* weekday_name = weekdays[day_of_week];
-          ESP_LOGD("Display", "Day of Week (n): %d", day_of_week);
-          ESP_LOGD("Display", "Day of Week: %s", weekday_name);
-          it.printf(250, 50, id(title_font), "%s", weekday_name);
+          if (time_now.is_valid()) {
+            it.strftime(250, 50, id(title_font), "%A", time_now);
+            it.strftime(250, 85, id(title_font), "%B %d", time_now);
+          }
 
           // define generic border info
           int w = 180, h = 120, r = 10, thickness = 4;
