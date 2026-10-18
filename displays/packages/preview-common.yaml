@@ -4,6 +4,10 @@ esphome:
   platformio_options:
     build_flags:
       - "-Wl,--wrap=time"
+  on_boot:
+    - priority: 1000
+      then:
+        - lambda: 'set_preview_time("${preview_time}");'
 
 host:
 

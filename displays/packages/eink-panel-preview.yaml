@@ -18,9 +18,8 @@ packages:
 esphome:
   name: eink-panel-preview
   on_boot:
-    priority: -100
-    then:
-      - lambda: 'set_preview_time("${preview_time}");'
+    - priority: -100
+      then:
       - text_sensor.template.publish:
           id: myWeather
           state: "${preview_weather}"
