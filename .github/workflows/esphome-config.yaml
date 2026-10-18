@@ -7,6 +7,10 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   UV_SYSTEM_PYTHON: 1
 
@@ -17,7 +21,7 @@ jobs:
       config: ${{ steps.config.outputs.config }}
     steps:
     - uses: actions/checkout@v7
-    - name: Define cofnig files
+    - name: Define config files
       id: config
       run: |
         CONFIG=$(scripts/find-config.sh)
@@ -60,10 +64,6 @@ jobs:
         cp config/secrets-example.yaml displays/secrets.yaml
         cp config/secrets-example.yaml camera/secrets.yaml
 
-    - name: Check Config ${{matrix.config_file}}
-      run: |
-        esphome config ${{matrix.config_file}}
-  
     - name: Check Compile ${{matrix.config_file}}
       run: |
         esphome compile ${{matrix.config_file}}
