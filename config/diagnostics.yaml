@@ -1,0 +1,25 @@
+substitutions:
+  diagnostic_update_interval: 5min
+
+sensor:
+  - platform: wifi_signal
+    name: "Wifi Signal"
+    id: wifisignal
+    unit_of_measurement: "dBm"
+    entity_category: "diagnostic"
+    update_interval: ${diagnostic_update_interval}
+  - platform: internal_temperature
+    name: "Internal Temperature"
+    id: internal_temp
+    entity_category: "diagnostic"
+    update_interval: ${diagnostic_update_interval}
+  - platform: uptime
+    name: "Uptime"
+    id: uptime_sensor
+    entity_category: "diagnostic"
+    update_interval: ${diagnostic_update_interval}
+
+button:
+  - platform: restart
+    name: "Restart"
+    entity_category: config

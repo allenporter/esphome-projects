@@ -29,12 +29,6 @@ esp32:
   board: nodemcu-32s
 
 sensor:
-  - platform: wifi_signal
-    name: "E-Ink Frame Wifi Signal"
-    id: wifisignal
-    unit_of_measurement: "dBm"
-    entity_category: "diagnostic"
-    update_interval: 60s
   - platform: homeassistant
     id: temperature
     entity_id: sensor.weather_temperature
@@ -125,6 +119,7 @@ time:
     timezone: 'America/Los_Angeles'
   
 packages:
+  diagnostics: !include ../config/diagnostics.yaml
   display_ui: !include packages/eink-frame-display.yaml
 
 spi:

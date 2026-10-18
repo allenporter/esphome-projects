@@ -104,30 +104,12 @@ interval:
                       id: deep_sleep_1
 
 
-sensor:
-  - platform: wifi_signal
-    name: "Wifi Signal"
-    id: wifisignal
-    unit_of_measurement: "dBm"
-    entity_category: "diagnostic"
-    update_interval: never
-  - platform: internal_temperature
-    name: "Internal Temperature"
-    id: internal_temp
-    entity_category: "diagnostic"
-    update_interval: never
-  - platform: uptime
-    name: "Uptime"
-    id: uptime_sensor
-    entity_category: "diagnostic"
-    update_interval: never
+substitutions:
+  diagnostic_update_interval: never
 
 button:
   - platform: shutdown
     name: "Shutdown"
-    entity_category: config
-  - platform: restart
-    name: "Restart"
     entity_category: config
   # - platform: template
   #   name: "Refresh Screen"
@@ -170,6 +152,7 @@ text_sensor:
     id: forecast
 
 packages:
+  diagnostics: !include ../config/diagnostics.yaml
   display_ui: !include packages/eink-panel-display.yaml
 
 # script:
