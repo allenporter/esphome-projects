@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import io
 from pathlib import Path
 import sys
 from typing import Any
 
+from PIL import Image
 import pytest
 from syrupy.assertion import SnapshotAssertion
 
@@ -47,24 +49,27 @@ CONCEPT_RENDERERS: list[tuple[str, Any, str]] = [
 ]
 
 
-@pytest.mark.parametrize(
-    ("concept_id", "module", "func_name"),
-    CONCEPT_RENDERERS,
-    ids=[cid for cid, _, _ in CONCEPT_RENDERERS],
-)
-def test_eink_panel_concept_gallery(
-    concept_id: str,
-    module: Any,
-    func_name: str,
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    snapshot_png: SnapshotAssertion,
-) -> None:
-    """Render each tournament concept to PNG and verify against its syrupy snapshot."""
-    monkeypatch.setattr(module, "OUT_DIR", str(tmp_path))
-    render_fn = getattr(module, func_name)
-    render_fn()
-    short_prefix = "_".join(concept_id.split("_")[:2])
-    out_file = tmp_path / f"{short_prefix}.png"
-    assert out_file.exists(), f"Expected rendered concept at {out_file}"
-    assert out_file.read_bytes() == snapshot_png
+def _make_concept_test(concept_id: str, module: Any, func_name: str) -> Any:
+    def _test(
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        snapshot_png: SnapshotAssertion,
+    ) -> None:
+        monkeypatch.setattr(module, "OUT_DIR", str(tmp_path))
+        render_fn = getattr(module, func_name)
+        render_fn()
+        short_prefix = "_".join(concept_id.split("_")[:2])
+        out_file = tmp_path / f"{short_prefix}.png"
+        assert out_file.exists(), f"Expected rendered concept at {out_file}"
+        with Image.open(out_file) as img:
+            buf = io.BytesIO()
+            img.convert("RGB").save(buf, format="PNG")
+            assert buf.getvalue() == snapshot_png
+
+    _test.__name__ = f"test_concept_{concept_id}"
+    _test.__qualname__ = f"test_concept_{concept_id}"
+    return _test
+
+
+for _cid, _mod, _fn in CONCEPT_RENDERERS:
+    globals()[f"test_concept_{_cid}"] = _make_concept_test(_cid, _mod, _fn)
