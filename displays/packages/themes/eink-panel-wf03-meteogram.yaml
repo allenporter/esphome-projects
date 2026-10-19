@@ -1,0 +1,431 @@
+# Theme WF-03: R-P1 Split-Contrast x Yr.no Halftone Meteogram
+# Active Championship Winner for displays/eink-panel.yaml (800x480)
+
+font:
+  - file: "../config/fonts/Montserrat-Black.ttf"
+    id: font_black_72
+    size: 72
+    glyphs: [' ', '-', '°', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'F']
+  - file: "../config/fonts/Montserrat-Black.ttf"
+    id: font_black_24
+    size: 24
+  - file: "../config/fonts/Montserrat-Black.ttf"
+    id: font_black_16
+    size: 16
+  - file: "../config/fonts/Montserrat-Black.ttf"
+    id: font_black_13
+    size: 13
+  - file: "../config/fonts/GothamRnd-Bold.ttf"
+    id: font_bold_16
+    size: 16
+  - file: "../config/fonts/GothamRnd-Bold.ttf"
+    id: font_bold_13
+    size: 13
+  - file: "../config/fonts/GothamRnd-Book.ttf"
+    id: font_book_15
+    size: 15
+  - file: "../config/fonts/GothamRnd-Book.ttf"
+    id: font_book_13
+    size: 13
+  - file: "../config/fonts/SpaceMono-Bold.ttf"
+    id: font_spacemono_11
+    size: 11
+  - file: "../config/fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi_64
+    size: 64
+    glyphs: &mdi-wf03-glyphs
+      - "\U000F0590" # mdi-weather-cloudy
+      - "\U000F0F2F" # mdi-weather-cloudy-alert
+      - "\U000F0E6E" # mdi-weather-cloudy-arrow-right
+      - "\U000F0591" # mdi-weather-fog
+      - "\U000F0592" # mdi-weather-hail
+      - "\U000F0F30" # mdi-weather-hazy
+      - "\U000F0898" # mdi-weather-hurricane
+      - "\U000F0593" # mdi-weather-lightning
+      - "\U000F067E" # mdi-weather-lightning-rainy
+      - "\U000F0594" # mdi-weather-night
+      - "\U000F0F31" # mdi-weather-night-partly-cloudy
+      - "\U000F0595" # mdi-weather-partly-cloudy
+      - "\U000F0F32" # mdi-weather-partly-lightning
+      - "\U000F0F33" # mdi-weather-partly-rainy
+      - "\U000F0F34" # mdi-weather-partly-snowy
+      - "\U000F0F35" # mdi-weather-partly-snowy-rainy
+      - "\U000F0596" # mdi-weather-pouring
+      - "\U000F0597" # mdi-weather-rainy
+      - "\U000F0598" # mdi-weather-snowy
+      - "\U000F0F36" # mdi-weather-snowy-heavy
+      - "\U000F067F" # mdi-weather-snowy-rainy
+      - "\U000F0599" # mdi-weather-sunny
+      - "\U000F0F37" # mdi-weather-sunny-alert
+      - "\U000F14E4" # mdi-weather-sunny-off
+      - "\U000F059A" # mdi-weather-sunset
+      - "\U000F059B" # mdi-weather-sunset-down
+      - "\U000F059C" # mdi-weather-sunset-up
+      - "\U000F0F38" # mdi-weather-tornado
+      - "\U000F059D" # mdi-weather-windy
+      - "\U000F059E" # mdi-weather-windy-variant
+      - "\U000F010B" # mdi-car
+      - "\U000F078D" # mdi-waves
+  - file: "../config/fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi_24
+    size: 24
+    glyphs: *mdi-wf03-glyphs
+
+display:
+  - id: !extend display_panel
+    update_interval: never
+    lambda: |-
+      ESP_LOGD("Display", "Updating Display (Theme WF-03: R-P1 x Halftone Meteogram)...");
+      if (id(wifi_status) == 0) {
+        return;
+      }
+
+      auto get_weather_icon = [](const std::string &cond) -> const char * {
+        if (cond == "sunny" || cond == "clear") return "\U000F0599";
+        if (cond == "clear-night" || cond == "night") return "\U000F0594";
+        if (cond == "partlycloudy" || cond == "partly-cloudy") return "\U000F0595";
+        if (cond == "rainy" || cond == "partly-rainy") return "\U000F0597";
+        if (cond == "pouring") return "\U000F0596";
+        if (cond == "lightning" || cond == "lightning-rainy") return "\U000F0593";
+        if (cond == "snowy" || cond == "snowy-rainy") return "\U000F0598";
+        if (cond == "windy" || cond == "windy-variant") return "\U000F059D";
+        if (cond == "fog" || cond == "hazy") return "\U000F0591";
+        return "\U000F0590";
+      };
+
+      auto to_upper = [](std::string s) -> std::string {
+        for (char &c : s) {
+          if (c >= 'a' && c <= 'z') c = c - 'a' + 'A';
+        }
+        return s;
+      };
+
+      auto fmt_int = [](const std::string &s, const char *fallback = "--") -> std::string {
+        if (s.empty() || s == "unavailable" || s == "unknown") return fallback;
+        char *end = nullptr;
+        float val = std::strtof(s.c_str(), &end);
+        if (end == s.c_str()) return fallback;
+        char buf[16];
+        std::snprintf(buf, sizeof(buf), "%.0f", val);
+        return std::string(buf);
+      };
+
+      auto parse_num = [](const std::string &s, float def_val = 0.0f) -> float {
+        if (s.empty() || s == "unavailable" || s == "unknown") return def_val;
+        char *end = nullptr;
+        float val = std::strtof(s.c_str(), &end);
+        return (end == s.c_str()) ? def_val : val;
+      };
+
+      auto draw_card = [&](int x, int y, int w, int h, int r, int thickness) {
+        it.filled_rectangle(x + r, y, w - 2 * r, thickness);
+        it.filled_rectangle(x + r, y + h - thickness, w - 2 * r, thickness);
+        it.filled_rectangle(x, y + r, thickness, h - 2 * r);
+        it.filled_rectangle(x + w - thickness, y + r, thickness, h - 2 * r);
+        it.filled_circle(x + r, y + r, r);
+        it.filled_circle(x + w - r - 1, y + r, r);
+        it.filled_circle(x + r, y + h - r - 1, r);
+        it.filled_circle(x + w - r - 1, y + h - r - 1, r);
+        it.filled_rectangle(x + thickness, y + thickness, w - 2 * thickness, h - 2 * thickness, COLOR_OFF);
+      };
+
+      auto draw_white_pill = [&](int x, int y, int w, int h, int r) {
+        it.filled_rectangle(x + r, y, w - 2 * r, h, COLOR_OFF);
+        it.filled_rectangle(x, y + r, w, h - 2 * r, COLOR_OFF);
+        it.filled_circle(x + r, y + r, r, COLOR_OFF);
+        it.filled_circle(x + w - r - 1, y + r, r, COLOR_OFF);
+        it.filled_circle(x + r, y + h - r - 1, r, COLOR_OFF);
+        it.filled_circle(x + w - r - 1, y + h - r - 1, r, COLOR_OFF);
+      };
+
+      auto draw_bar = [&](int x, int y, int w, int h, float pct) {
+        if (pct < 0.0f) pct = 0.0f;
+        if (pct > 100.0f) pct = 100.0f;
+        it.rectangle(x, y, w, h);
+        it.rectangle(x + 1, y + 1, w - 2, h - 2);
+        int fill_w = static_cast<int>((w - 4) * (pct / 100.0f));
+        if (fill_w > 0) {
+          it.filled_rectangle(x + 2, y + 2, fill_w, h - 4);
+        }
+      };
+
+      auto fmt_route = [](const std::string &raw) -> std::string {
+        if (raw.empty() || raw == "unavailable" || raw == "unknown") return "";
+        std::string s = raw;
+        size_t comma = s.find(',');
+        if (comma != std::string::npos) s = s.substr(0, comma);
+        size_t la = s.find(" Los Angeles");
+        if (la != std::string::npos) s = s.substr(0, la);
+        size_t ave = s.find(" Ave");
+        if (ave != std::string::npos && s.length() > 10) s = s.substr(0, ave);
+        if (s.length() > 12) s = s.substr(0, 12);
+        return s;
+      };
+
+      // =====================================================================
+      // 1. LEFT SOLID BLACK SIDEBAR (x=0..256, y=0..480)
+      // =====================================================================
+      it.filled_rectangle(0, 0, 256, 480);
+
+      auto time_now = id(homeassistant_time).now();
+      if (time_now.is_valid()) {
+        char day_buf[24];
+        char date_buf[24];
+        time_now.strftime(day_buf, sizeof(day_buf), "%A");
+        time_now.strftime(date_buf, sizeof(date_buf), "%B %d");
+        it.print(22, 16, id(font_black_24), COLOR_OFF, to_upper(day_buf).c_str());
+        it.print(22, 44, id(font_book_15), COLOR_OFF, to_upper(date_buf).c_str());
+      }
+      it.line(22, 68, 234, 68, COLOR_OFF);
+
+      std::string out_temp = fmt_int(id(temp).state);
+      it.printf(20, 74, id(font_black_72), COLOR_OFF, "%s°", out_temp.c_str());
+      std::string cond_str = id(myWeather).state;
+      it.printf(200, 114, id(font_mdi_64), COLOR_OFF, TextAlign::CENTER, "%s", get_weather_icon(cond_str));
+
+      std::string cond_upper = to_upper(cond_str);
+      if (cond_upper == "PARTLYCLOUDY") cond_upper = "PARTLY CLOUDY";
+      if (cond_upper == "CLEAR-NIGHT") cond_upper = "CLEAR NIGHT";
+      std::string humi_str = fmt_int(id(humi).state);
+      it.printf(22, 160, id(font_bold_16), COLOR_OFF, "%s • %s%% RH", cond_upper.c_str(), humi_str.c_str());
+
+      float aqi_val = parse_num(id(aqi).state, -1.0f);
+      const char *aqi_lbl = (aqi_val <= 50.0f) ? "GOOD" : (aqi_val <= 100.0f) ? "MOD" : "HIGH";
+      std::string uv_raw = id(uv).state;
+      if (uv_raw.empty() || uv_raw == "unavailable" || uv_raw == "unknown") {
+        uv_raw = id(weather_uv).state;
+      }
+      float uv_val = parse_num(uv_raw, 0.0f);
+      it.printf(22, 184, id(font_book_13), COLOR_OFF, "AQI %.0f %s • UV %.1f",
+                aqi_val >= 0.0f ? aqi_val : 0.0f, aqi_lbl, uv_val);
+
+      it.line(22, 208, 234, 208, COLOR_OFF);
+
+      // 6-Zone Climate Table (3 Indoor + Divider + 3 Outdoor)
+      it.print(22, 218, id(font_bold_13), COLOR_OFF, "CLIMATE ZONES");
+      it.print(234, 218, id(font_book_13), COLOR_OFF, TextAlign::TOP_RIGHT, "TEMP / RH");
+
+      const char *z_names[6] = {"Dining", "Loft", "Crawlspace", "Cabana", "Driveway", "Backyard"};
+      std::string z_temps[6] = {
+        fmt_int(id(dining_temp).state),
+        fmt_int(id(loft_temp).state),
+        fmt_int(id(crawlspace_temp).state),
+        fmt_int(id(cabana_temp).state),
+        fmt_int(id(driveway_temp).state),
+        fmt_int(id(backyard_temp).state)
+      };
+      std::string z_humis[6] = {
+        fmt_int(id(dining_humi).state),
+        fmt_int(id(loft_humi).state),
+        fmt_int(id(crawlspace_humi).state),
+        fmt_int(id(cabana_humi).state),
+        fmt_int(id(driveway_humi).state),
+        fmt_int(id(backyard_humi).state)
+      };
+
+      int sy = 240;
+      for (int i = 0; i < 6; i++) {
+        if (i == 3) {
+          it.line(22, sy - 4, 234, sy - 4, COLOR_OFF);
+          sy += 4;
+        }
+        it.print(22, sy + 2, id(font_book_15), COLOR_OFF, z_names[i]);
+        it.printf(174, sy + 1, id(font_bold_16), COLOR_OFF, TextAlign::TOP_RIGHT, "%s°", z_temps[i].c_str());
+        draw_white_pill(182, sy, 52, 22, 4);
+        it.printf(208, sy + 11, id(font_black_13), COLOR_ON, TextAlign::CENTER, "%s%%", z_humis[i].c_str());
+        sy += 38;
+      }
+
+      // =====================================================================
+      // 2. RIGHT TOP: SWEEPING YR.NO HALFTONE METEOGRAM (x=280..776, y=16..196)
+      // =====================================================================
+      it.print(280, 16, id(font_black_16), "HOURLY METEOGRAM");
+      if (time_now.is_valid()) {
+        char upd_buf[48];
+        time_now.strftime(upd_buf, sizeof(upd_buf), "Updated %I:%M %p");
+        it.printf(776, 18, id(font_book_13), TextAlign::TOP_RIGHT, "Wind %s mph • %s",
+                  fmt_int(id(wind).state).c_str(), upd_buf);
+      }
+      it.filled_rectangle(280, 40, 496, 2);
+
+      int anchor_x[5] = {316, 422, 528, 634, 740};
+      std::string col_time[5] = {
+        "NOW",
+        id(weather_timestamp_0).state,
+        id(weather_timestamp_1).state,
+        id(weather_timestamp_2).state,
+        id(weather_timestamp_3).state
+      };
+      std::string col_cond[5] = {
+        id(myWeather).state,
+        id(weather_condition_0).state,
+        id(weather_condition_1).state,
+        id(weather_condition_2).state,
+        id(weather_condition_3).state
+      };
+      float col_temp[5] = {
+        parse_num(id(temp).state, 75.0f),
+        parse_num(id(weather_temperature_0).state, 75.0f),
+        parse_num(id(weather_temperature_1).state, 75.0f),
+        parse_num(id(weather_temperature_2).state, 75.0f),
+        parse_num(id(weather_temperature_3).state, 75.0f)
+      };
+
+      float t_min = col_temp[0], t_max = col_temp[0];
+      for (int i = 1; i < 5; i++) {
+        if (col_temp[i] < t_min) t_min = col_temp[i];
+        if (col_temp[i] > t_max) t_max = col_temp[i];
+      }
+      float t_span = (t_max - t_min < 5.0f) ? 5.0f : (t_max - t_min);
+
+      int anchor_y[5];
+      for (int i = 0; i < 5; i++) {
+        anchor_y[i] = 122 - static_cast<int>(((col_temp[i] - t_min) / t_span) * 35.0f);
+      }
+
+      // Cosine-interpolated curve + 3x3 halftone dot fill under curve
+      int prev_x = 296;
+      int prev_y = anchor_y[0];
+      for (int x = 296; x <= 760; x++) {
+        int cy = anchor_y[0];
+        if (x <= anchor_x[0]) {
+          cy = anchor_y[0];
+        } else if (x >= anchor_x[4]) {
+          cy = anchor_y[4];
+        } else {
+          for (int k = 0; k < 4; k++) {
+            if (x >= anchor_x[k] && x <= anchor_x[k + 1]) {
+              float mu = static_cast<float>(x - anchor_x[k]) / static_cast<float>(anchor_x[k + 1] - anchor_x[k]);
+              float mu2 = (1.0f - std::cos(mu * 3.14159265f)) * 0.5f;
+              cy = static_cast<int>(anchor_y[k] * (1.0f - mu2) + anchor_y[k + 1] * mu2);
+              break;
+            }
+          }
+        }
+        it.line(prev_x, prev_y, x, cy);
+        it.line(prev_x, prev_y - 1, x, cy - 1);
+        it.line(prev_x, prev_y + 1, x, cy + 1);
+        prev_x = x;
+        prev_y = cy;
+
+        for (int y = cy + 2; y < 164; y++) {
+          if ((x % 3 == 0) && (y % 3 == 0)) {
+            it.draw_pixel_at(x, y);
+          }
+        }
+      }
+
+      for (int i = 0; i < 5; i++) {
+        int nx = anchor_x[i];
+        int ny = anchor_y[i];
+        it.filled_circle(nx, ny, 5);
+        it.filled_circle(nx, ny, 2, COLOR_OFF);
+        it.printf(nx, ny - 24, id(font_mdi_24), TextAlign::CENTER, "%s", get_weather_icon(col_cond[i]));
+        it.printf(nx + 24, ny - 14, id(font_black_13), TextAlign::CENTER, "%.0f°", col_temp[i]);
+        it.printf(nx, 174, id(font_spacemono_11), TextAlign::CENTER, "%s", col_time[i].c_str());
+      }
+
+      it.filled_rectangle(280, 196, 496, 2);
+
+      // =====================================================================
+      // 3. RIGHT MIDDLE: 5-DAY FORECAST SUMMARY (x=280..776, y=208..276)
+      // =====================================================================
+      std::string input = id(forecast).state;
+      int y_line = 208;
+      int max_chars = 60;
+      size_t idx = 0;
+      int lines_printed = 0;
+      while (idx < input.length() && lines_printed < 3) {
+        size_t line_end = idx + max_chars;
+        if (line_end >= input.length()) {
+          it.print(280, y_line, id(font_book_15), input.substr(idx).c_str());
+          break;
+        }
+        size_t space = input.rfind(' ', line_end);
+        if (space == std::string::npos || space <= idx) space = line_end;
+        it.print(280, y_line, id(font_book_15), input.substr(idx, space - idx).c_str());
+        idx = space + 1;
+        y_line += 21;
+        lines_printed++;
+      }
+
+      it.filled_rectangle(280, 276, 496, 2);
+
+      // =====================================================================
+      // 4. RIGHT BOTTOM: 3 R-P1 ROUNDED GAUGE CARDS (y=290..464)
+      // =====================================================================
+
+      // --- Card 1: COMMUTE (x=280..436, w=156, h=174) ---
+      draw_card(280, 290, 156, 174, 10, 2);
+      it.print(294, 304, id(font_bold_13), "COMMUTE");
+      it.printf(294, 326, id(font_black_24), "%s min", fmt_int(id(work_travel_time).state).c_str());
+      it.printf(294, 356, id(font_book_13), "Work (%s)", fmt_route(id(work_route).state).c_str());
+      it.line(294, 382, 422, 382);
+      it.printf(294, 390, id(font_black_24), "%s min", fmt_int(id(wish_travel_time).state).c_str());
+      it.printf(294, 420, id(font_book_13), "WISH (%s)", fmt_route(id(wish_route).state).c_str());
+
+      // --- Card 2: MODEL 3 & SOFTENER (x=450..606, w=156, h=174) ---
+      draw_card(450, 290, 156, 174, 10, 2);
+      it.print(464, 304, id(font_bold_13), "MODEL 3");
+      float ev_pct = parse_num(id(ev_battery).state, 0.0f);
+      it.printf(464, 326, id(font_black_24), "%s%%", fmt_int(id(ev_battery).state).c_str());
+      it.printf(592, 334, id(font_bold_13), TextAlign::TOP_RIGHT, "%s mi", fmt_int(id(ev_range).state).c_str());
+      draw_bar(464, 362, 128, 12, ev_pct);
+
+      it.print(464, 392, id(font_bold_13), "SOFTENER");
+      float salt_pct = parse_num(id(softener_salt).state, 0.0f);
+      it.printf(592, 392, id(font_bold_13), TextAlign::TOP_RIGHT, "%s%%", fmt_int(id(softener_salt).state).c_str());
+      draw_bar(464, 416, 128, 12, salt_pct);
+
+      // --- Card 3: SANTA MONICA TIDES (x=620..776, w=156, h=174) ---
+      draw_card(620, 290, 156, 174, 10, 2);
+      it.print(634, 304, id(font_bold_13), "SANTA MONICA");
+
+      std::string t_state = id(tides_state).state;
+      std::string tide_title = "Next Tide";
+      std::string tide_time = t_state;
+      size_t at_pos = t_state.find(" at ");
+      if (at_pos != std::string::npos) {
+        std::string kind = t_state.substr(0, at_pos);
+        if (kind == "High tide") tide_title = "High Tide";
+        else if (kind == "Low tide") tide_title = "Low Tide";
+        else tide_title = kind;
+        tide_time = t_state.substr(at_pos + 4);
+      }
+      it.print(634, 326, id(font_black_24), tide_time.c_str());
+      it.print(634, 356, id(font_book_13), tide_title.c_str());
+
+      // Sinusoidal tide wave across x=634..762, y=400 +- 12px
+      int w_prev_x = 634;
+      int w_prev_y = 400 - static_cast<int>(12.0f * std::sin((-0.05f) * 1.8f * 3.14159265f));
+      for (int px = 638; px <= 762; px += 4) {
+        float t = static_cast<float>(px - 634) / 128.0f;
+        int py = 400 - static_cast<int>(12.0f * std::sin((t - 0.05f) * 1.8f * 3.14159265f));
+        it.line(w_prev_x, w_prev_y, px, py);
+        it.line(w_prev_x, w_prev_y + 1, px, py + 1);
+        w_prev_x = px;
+        w_prev_y = py;
+      }
+
+      auto fmt_iso_time = [](const std::string &iso) -> std::string {
+        size_t t_pos = iso.find('T');
+        if (t_pos == std::string::npos || iso.length() < t_pos + 6) return "";
+        int hh = std::atoi(iso.substr(t_pos + 1, 2).c_str());
+        std::string mm = iso.substr(t_pos + 4, 2);
+        const char *ampm = (hh >= 12) ? "PM" : "AM";
+        int h12 = hh % 12;
+        if (h12 == 0) h12 = 12;
+        char buf[16];
+        std::snprintf(buf, sizeof(buf), "%d:%s %s", h12, mm.c_str(), ampm);
+        return std::string(buf);
+      };
+
+      std::string sub_tide = "";
+      if (tide_title == "High Tide") {
+        std::string lt = fmt_iso_time(id(low_tide_time).state);
+        if (!lt.empty()) sub_tide = "Low: " + lt;
+      } else {
+        std::string ht = fmt_iso_time(id(high_tide_time).state);
+        if (!ht.empty()) sub_tide = "High: " + ht;
+      }
+      it.print(634, 428, id(font_bold_13), sub_tide.c_str());

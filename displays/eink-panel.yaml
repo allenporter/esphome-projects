@@ -10,6 +10,9 @@ api:
 ota:
   - platform: esphome
     password: !secret ota_password
+    on_begin:
+      then:
+        - deep_sleep.prevent: deep_sleep_1
 
 json:
 
@@ -80,13 +83,15 @@ interval:
           then:
             - lambda: "id(update_done) = true;"
             # Brief delay so remaining Home Assistant entity states finish arriving
-            - delay: 2s
+            - delay: 3s
             - lambda: |-
                 ESP_LOGD("Display", "Triggered Display Update...");
             - component.update: wifisignal
             - component.update: internal_temp
             - component.update: uptime_sensor
             - component.update: display_panel
+            # Brief grace window so OTA uploads can connect before deep sleep
+            - delay: 5s
             - if:
                 condition:
                   lambda: |-
@@ -142,14 +147,142 @@ text_sensor:
     id: wind
     attribute: "wind_speed"
   - platform: homeassistant
-    entity_id:  sensor.current_uv_index
+    entity_id: weather.woodgreen
+    id: weather_uv
+    attribute: "uv_index"
+  - platform: homeassistant
+    entity_id: sensor.current_uv_index
     id: uv
   - platform: homeassistant
-    entity_id:  sensor.current_uv_level
+    entity_id: sensor.current_uv_level
     id: uv_level
   - platform: homeassistant
     entity_id: sensor.daily_weather_forecast_summary
     id: forecast
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_timestamp_0
+    id: weather_timestamp_0
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_condition_0
+    id: weather_condition_0
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_temperature_0
+    id: weather_temperature_0
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_timestamp_1
+    id: weather_timestamp_1
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_condition_1
+    id: weather_condition_1
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_temperature_1
+    id: weather_temperature_1
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_timestamp_2
+    id: weather_timestamp_2
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_condition_2
+    id: weather_condition_2
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_temperature_2
+    id: weather_temperature_2
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_timestamp_3
+    id: weather_timestamp_3
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_condition_3
+    id: weather_condition_3
+  - platform: homeassistant
+    entity_id: sensor.woodgreen_forecast_display
+    attribute: weather_temperature_3
+    id: weather_temperature_3
+  - platform: homeassistant
+    entity_id: sensor.dining_room_temperature
+    id: dining_temp
+  - platform: homeassistant
+    entity_id: sensor.dining_room_humidity
+    id: dining_humi
+  - platform: homeassistant
+    entity_id: sensor.loft_temperature
+    id: loft_temp
+  - platform: homeassistant
+    entity_id: sensor.loft_humidity
+    id: loft_humi
+  - platform: homeassistant
+    entity_id: sensor.crawlspace_sensor_air_temperature
+    id: crawlspace_temp
+  - platform: homeassistant
+    entity_id: sensor.crawlspace_sensor_humidity
+    id: crawlspace_humi
+  - platform: homeassistant
+    entity_id: sensor.cabana_sensor_air_temperature
+    id: cabana_temp
+  - platform: homeassistant
+    entity_id: sensor.cabana_sensor_humidity
+    id: cabana_humi
+  - platform: homeassistant
+    entity_id: sensor.driveway_sensor_air_temperature
+    id: driveway_temp
+  - platform: homeassistant
+    entity_id: sensor.driveway_sensor_humidity
+    id: driveway_humi
+  - platform: homeassistant
+    entity_id: sensor.backyard_sensor_air_temperature
+    id: backyard_temp
+  - platform: homeassistant
+    entity_id: sensor.backyard_sensor_humidity
+    id: backyard_humi
+  - platform: homeassistant
+    entity_id: sensor.walgrove_es_7603_air_quality_index
+    id: aqi
+  - platform: homeassistant
+    entity_id: sensor.grey_model_3_battery_level
+    id: ev_battery
+  - platform: homeassistant
+    entity_id: sensor.grey_model_3_battery_range
+    id: ev_range
+  - platform: homeassistant
+    entity_id: lock.grey_model_3_lock
+    id: ev_lock
+  - platform: homeassistant
+    entity_id: sensor.work_travel_time
+    id: work_travel_time
+  - platform: homeassistant
+    entity_id: sensor.work_travel_time
+    attribute: route
+    id: work_route
+  - platform: homeassistant
+    entity_id: sensor.wish_travel_time
+    id: wish_travel_time
+  - platform: homeassistant
+    entity_id: sensor.wish_travel_time
+    attribute: route
+    id: wish_route
+  - platform: homeassistant
+    entity_id: sensor.tides
+    id: tides_state
+  - platform: homeassistant
+    entity_id: sensor.tides
+    attribute: low_tide_time
+    id: low_tide_time
+  - platform: homeassistant
+    entity_id: sensor.tides
+    attribute: high_tide_time
+    id: high_tide_time
+  - platform: homeassistant
+    entity_id: sensor.water_softener_level
+    id: softener_salt
 
 packages:
   diagnostics: !include ../config/diagnostics.yaml

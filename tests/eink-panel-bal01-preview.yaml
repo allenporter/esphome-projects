@@ -1,0 +1,6 @@
+packages:
+  preview_base: !include eink-panel-preview-base.yaml
+  display_ui: !include ../displays/packages/themes/eink-panel-bal01-rp1-v2.yaml
+
+esphome:
+  name: eink-panel-bal01-preview

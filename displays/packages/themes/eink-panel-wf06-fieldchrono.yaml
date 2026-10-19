@@ -1,0 +1,311 @@
+# Theme WF-06: Casio G-Shock x Teenage Engineering Field Chrono v2
+# Octagonal watch bezel + 4 sub-dials + 10-segment LED bars
+
+font:
+  - file: "../config/fonts/ChakraPetch-Bold.ttf"
+    id: font_chakra_56
+    size: 56
+    glyphs: [' ', '-', '°', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'F', '%']
+  - file: "../config/fonts/ChakraPetch-Bold.ttf"
+    id: font_chakra_b24
+    size: 24
+  - file: "../config/fonts/ChakraPetch-Bold.ttf"
+    id: font_chakra_b20
+    size: 20
+  - file: "../config/fonts/ChakraPetch-Bold.ttf"
+    id: font_chakra_b15
+    size: 15
+  - file: "../config/fonts/ChakraPetch-Bold.ttf"
+    id: font_chakra_b12
+    size: 12
+  - file: "../config/fonts/ChakraPetch-Regular.ttf"
+    id: font_chakra_13
+    size: 13
+  - file: "../config/fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi_52
+    size: 52
+    glyphs: &mdi-wf06-glyphs
+      - "\U000F0590" # mdi-weather-cloudy
+      - "\U000F0F2F" # mdi-weather-cloudy-alert
+      - "\U000F0E6E" # mdi-weather-cloudy-arrow-right
+      - "\U000F0591" # mdi-weather-fog
+      - "\U000F0592" # mdi-weather-hail
+      - "\U000F0F30" # mdi-weather-hazy
+      - "\U000F0898" # mdi-weather-hurricane
+      - "\U000F0593" # mdi-weather-lightning
+      - "\U000F067E" # mdi-weather-lightning-rainy
+      - "\U000F0594" # mdi-weather-night
+      - "\U000F0F31" # mdi-weather-night-partly-cloudy
+      - "\U000F0595" # mdi-weather-partly-cloudy
+      - "\U000F0F32" # mdi-weather-partly-lightning
+      - "\U000F0F33" # mdi-weather-partly-rainy
+      - "\U000F0F34" # mdi-weather-partly-snowy
+      - "\U000F0F35" # mdi-weather-partly-snowy-rainy
+      - "\U000F0596" # mdi-weather-pouring
+      - "\U000F0597" # mdi-weather-rainy
+      - "\U000F0598" # mdi-weather-snowy
+      - "\U000F0F36" # mdi-weather-snowy-heavy
+      - "\U000F067F" # mdi-weather-snowy-rainy
+      - "\U000F0599" # mdi-weather-sunny
+      - "\U000F0F37" # mdi-weather-sunny-alert
+      - "\U000F14E4" # mdi-weather-sunny-off
+      - "\U000F059A" # mdi-weather-sunset
+      - "\U000F059B" # mdi-weather-sunset-down
+      - "\U000F059C" # mdi-weather-sunset-up
+      - "\U000F0F38" # mdi-weather-tornado
+      - "\U000F059D" # mdi-weather-windy
+      - "\U000F059E" # mdi-weather-windy-variant
+  - file: "../config/fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi_22
+    size: 22
+    glyphs: *mdi-wf06-glyphs
+
+display:
+  - id: !extend display_panel
+    update_interval: never
+    lambda: |-
+      ESP_LOGD("Display", "Updating Display (Theme WF-06: Casio Field Chrono)...");
+      if (id(wifi_status) == 0) {
+        return;
+      }
+
+      auto get_weather_icon = [](const std::string &cond) -> const char * {
+        if (cond == "sunny" || cond == "clear") return "\U000F0599";
+        if (cond == "clear-night" || cond == "night") return "\U000F0594";
+        if (cond == "partlycloudy" || cond == "partly-cloudy") return "\U000F0595";
+        if (cond == "rainy" || cond == "partly-rainy") return "\U000F0597";
+        if (cond == "pouring") return "\U000F0596";
+        if (cond == "lightning" || cond == "lightning-rainy") return "\U000F0593";
+        if (cond == "snowy" || cond == "snowy-rainy") return "\U000F0598";
+        if (cond == "windy" || cond == "windy-variant") return "\U000F059D";
+        if (cond == "fog" || cond == "hazy") return "\U000F0591";
+        return "\U000F0590";
+      };
+
+      auto to_upper = [](std::string s) -> std::string {
+        for (char &c : s) {
+          if (c >= 'a' && c <= 'z') c = c - 'a' + 'A';
+        }
+        return s;
+      };
+
+      auto fmt_int = [](const std::string &s, const char *fallback = "--") -> std::string {
+        if (s.empty() || s == "unavailable" || s == "unknown") return fallback;
+        char *end = nullptr;
+        float val = std::strtof(s.c_str(), &end);
+        if (end == s.c_str()) return fallback;
+        char buf[16];
+        std::snprintf(buf, sizeof(buf), "%.0f", val);
+        return std::string(buf);
+      };
+
+      auto parse_num = [](const std::string &s, float def_val = 0.0f) -> float {
+        if (s.empty() || s == "unavailable" || s == "unknown") return def_val;
+        char *end = nullptr;
+        float val = std::strtof(s.c_str(), &end);
+        return (end == s.c_str()) ? def_val : val;
+      };
+
+      auto draw_card = [&](int x, int y, int w, int h, int r, int thickness) {
+        it.filled_rectangle(x + r, y, w - 2 * r, thickness);
+        it.filled_rectangle(x + r, y + h - thickness, w - 2 * r, thickness);
+        it.filled_rectangle(x, y + r, thickness, h - 2 * r);
+        it.filled_rectangle(x + w - thickness, y + r, thickness, h - 2 * r);
+        it.filled_circle(x + r, y + r, r);
+        it.filled_circle(x + w - r - 1, y + r, r);
+        it.filled_circle(x + r, y + h - r - 1, r);
+        it.filled_circle(x + w - r - 1, y + h - r - 1, r);
+        it.filled_rectangle(x + thickness, y + thickness, w - 2 * thickness, h - 2 * thickness, COLOR_OFF);
+      };
+
+      // Octagonal Watch Bezel
+      it.filled_rectangle(0, 0, 800, 480);
+      for (int y = 12; y <= 468; y++) {
+        int inset = 0;
+        if (y < 36) inset = 36 - y;
+        else if (y > 444) inset = y - 444;
+        it.line(12 + inset, y, 788 - inset, y, COLOR_OFF);
+      }
+      // Inner octagonal ring
+      it.filled_rectangle(44, 19, 712, 3);
+      it.filled_rectangle(44, 458, 712, 3);
+      it.filled_rectangle(19, 44, 3, 392);
+      it.filled_rectangle(778, 44, 3, 392);
+      for (int o = -1; o <= 1; o++) {
+        it.line(20, 44 + o, 44, 20 + o);
+        it.line(756, 20 + o, 780, 44 + o);
+        it.line(780, 436 + o, 756, 460 + o);
+        it.line(44, 460 + o, 20, 436 + o);
+      }
+
+      it.filled_rectangle(48, 28, 704, 34);
+      it.print(60, 35, id(font_chakra_b15), COLOR_OFF, "FIELD CHRONO // WOODGREEN TELEMETRY");
+
+      auto time_now = id(homeassistant_time).now();
+      std::string uv_raw = id(uv).state;
+      if (uv_raw.empty() || uv_raw == "unavailable" || uv_raw == "unknown") uv_raw = id(weather_uv).state;
+      float uv_val = parse_num(uv_raw, 0.0f);
+      if (time_now.is_valid()) {
+        char d_buf[24];
+        time_now.strftime(d_buf, sizeof(d_buf), "%a %m-%d");
+        it.printf(740, 35, id(font_chakra_b15), COLOR_OFF, TextAlign::TOP_RIGHT, "%s  •  AQI %s  •  UV %.1f",
+                  to_upper(d_buf).c_str(), fmt_int(id(aqi).state).c_str(), uv_val);
+      }
+
+      // Sub-Bezel 1 (Top-Left): Weather + 5 Hourly Icons
+      draw_card(48, 72, 272, 196, 8, 3);
+      it.printf(62, 80, id(font_chakra_56), "%s°F", fmt_int(id(temp).state).c_str());
+      it.printf(272, 112, id(font_mdi_52), TextAlign::CENTER, "%s", get_weather_icon(id(myWeather).state));
+      std::string cond_u = to_upper(id(myWeather).state);
+      if (cond_u == "PARTLYCLOUDY") cond_u = "PARTLY CLOUDY";
+      it.printf(62, 144, id(font_chakra_b15), "%s • %s%% OUT RH", cond_u.c_str(), fmt_int(id(humi).state).c_str());
+      it.printf(62, 164, id(font_chakra_13), "WIND %s MPH • BARO STEADY", fmt_int(id(wind).state).c_str());
+      it.filled_rectangle(62, 186, 244, 2);
+
+      std::string col_time[5] = {
+        "NOW",
+        id(weather_timestamp_0).state,
+        id(weather_timestamp_1).state,
+        id(weather_timestamp_2).state,
+        id(weather_timestamp_3).state
+      };
+      std::string col_cond[5] = {
+        id(myWeather).state,
+        id(weather_condition_0).state,
+        id(weather_condition_1).state,
+        id(weather_condition_2).state,
+        id(weather_condition_3).state
+      };
+      std::string col_temp[5] = {
+        fmt_int(id(temp).state),
+        fmt_int(id(weather_temperature_0).state),
+        fmt_int(id(weather_temperature_1).state),
+        fmt_int(id(weather_temperature_2).state),
+        fmt_int(id(weather_temperature_3).state)
+      };
+
+      for (int i = 0; i < 5; i++) {
+        int cx = 64 + i * 48 + 20;
+        std::string ts_short = col_time[i].length() > 3 ? col_time[i].substr(0, 3) : col_time[i];
+        it.printf(cx, 194, id(font_chakra_b12), TextAlign::TOP_CENTER, "%s", ts_short.c_str());
+        it.printf(cx, 222, id(font_mdi_22), TextAlign::CENTER, "%s", get_weather_icon(col_cond[i]));
+        it.printf(cx, 240, id(font_chakra_b15), TextAlign::TOP_CENTER, "%s°", col_temp[i].c_str());
+      }
+
+      // Sub-Bezel 2 (Top-Right): 6-Zone Hygro-Thermo Matrix
+      draw_card(334, 72, 418, 196, 8, 3);
+      it.filled_rectangle(334, 72, 418, 26);
+      it.print(348, 77, id(font_chakra_b15), COLOR_OFF, "6-ZONE HYGRO-THERMO MATRIX");
+      it.print(738, 79, id(font_chakra_b12), COLOR_OFF, TextAlign::TOP_RIGHT, "INDOOR / OUTDOOR");
+
+      const char *z_caps[6] = {"DINING [IN]", "LOFT [IN]", "CRAWL [IN]", "CABANA [OUT]", "DRIVE [OUT]", "YARD [OUT]"};
+      std::string z_temps[6] = {
+        fmt_int(id(dining_temp).state),
+        fmt_int(id(loft_temp).state),
+        fmt_int(id(crawlspace_temp).state),
+        fmt_int(id(cabana_temp).state),
+        fmt_int(id(driveway_temp).state),
+        fmt_int(id(backyard_temp).state)
+      };
+      float z_rh[6] = {
+        parse_num(id(dining_humi).state, 0.0f),
+        parse_num(id(loft_humi).state, 0.0f),
+        parse_num(id(crawlspace_humi).state, 0.0f),
+        parse_num(id(cabana_humi).state, 0.0f),
+        parse_num(id(driveway_humi).state, 0.0f),
+        parse_num(id(backyard_humi).state, 0.0f)
+      };
+
+      int cw = 418 / 3, ch = 84;
+      for (int idx = 0; idx < 6; idx++) {
+        int col = idx % 3;
+        int row = idx / 3;
+        int zx = 334 + col * cw;
+        int zy = 98 + row * ch;
+        if (col > 0) it.line(zx, zy + 4, zx, zy + ch - 4);
+        if (row > 0) it.filled_rectangle(340, zy, 406, 2);
+        it.print(zx + 10, zy + 6, id(font_chakra_b12), z_caps[idx]);
+        it.printf(zx + 10, zy + 24, id(font_chakra_b24), "%s°", z_temps[idx].c_str());
+        it.printf(zx + cw - 10, zy + 28, id(font_chakra_b20), TextAlign::TOP_RIGHT, "%.0f%%", z_rh[idx]);
+        it.rectangle(zx + 10, zy + 62, cw - 22, 10);
+        int fw = static_cast<int>((cw - 26) * (z_rh[idx] / 100.0f));
+        if (fw > 0) it.filled_rectangle(zx + 12, zy + 64, fw, 6);
+      }
+
+      // Sub-Bezel 3 (Bottom-Left): 5-Day Outlook + Santa Monica Tide Graph
+      draw_card(48, 280, 376, 166, 8, 3);
+      it.print(62, 290, id(font_chakra_b15), "5-DAY OUTLOOK & TIDE GRAPH");
+
+      std::string input = id(forecast).state;
+      int y_line = 312;
+      size_t idx = 0;
+      int lines_printed = 0;
+      while (idx < input.length() && lines_printed < 3) {
+        size_t line_end = idx + 46;
+        if (line_end >= input.length()) {
+          it.print(62, y_line, id(font_chakra_13), input.substr(idx).c_str());
+          break;
+        }
+        size_t space = input.rfind(' ', line_end);
+        if (space == std::string::npos || space <= idx) space = line_end;
+        it.print(62, y_line, id(font_chakra_13), input.substr(idx, space - idx).c_str());
+        idx = space + 1;
+        y_line += 18;
+        lines_printed++;
+      }
+
+      it.line(62, 376, 410, 376);
+      std::string t_state = id(tides_state).state;
+      std::string tide_time = t_state;
+      size_t at_pos = t_state.find(" at ");
+      if (at_pos != std::string::npos) tide_time = t_state.substr(at_pos + 4);
+      it.printf(62, 388, id(font_chakra_b15), "HI TIDE: %s", tide_time.c_str());
+      it.print(62, 412, id(font_chakra_13), "LO TIDE: 11:38 PM");
+
+      int w_prev_x = 256;
+      int w_prev_y = 412 - static_cast<int>(14.0f * std::sin((-0.08f) * 1.8f * 3.14159265f));
+      for (int px = 260; px <= 406; px += 4) {
+        float t = static_cast<float>(px - 256) / 150.0f;
+        int py = 412 - static_cast<int>(14.0f * std::sin((t - 0.08f) * 1.8f * 3.14159265f));
+        it.line(w_prev_x, w_prev_y, px, py);
+        it.line(w_prev_x, w_prev_y + 1, px, py + 1);
+        w_prev_x = px;
+        w_prev_y = py;
+      }
+
+      // Sub-Bezel 4 (Bottom-Right): Commute + Model 3 + Softener Salt
+      draw_card(438, 280, 314, 166, 8, 3);
+      it.print(452, 290, id(font_chakra_13), "WORK (ROSE)");
+      it.printf(600, 288, id(font_chakra_b20), TextAlign::TOP_RIGHT, "%02dM",
+                static_cast<int>(parse_num(id(work_travel_time).state, 0.0f) + 0.5f));
+      it.print(616, 290, id(font_chakra_13), "WISH");
+      it.printf(738, 288, id(font_chakra_b20), TextAlign::TOP_RIGHT, "%02dM",
+                static_cast<int>(parse_num(id(wish_travel_time).state, 0.0f) + 0.5f));
+      it.filled_rectangle(452, 318, 286, 2);
+
+      float ev_pct = parse_num(id(ev_battery).state, 0.0f);
+      it.printf(452, 328, id(font_chakra_b15), "MODEL 3: %s%% (%s MI)",
+                fmt_int(id(ev_battery).state).c_str(), fmt_int(id(ev_range).state).c_str());
+      int ev_segs = static_cast<int>((ev_pct / 10.0f) + 0.5f);
+      for (int b = 0; b < 10; b++) {
+        int bx = 452 + b * 28;
+        if (b < ev_segs) {
+          it.filled_rectangle(bx, 352, 22, 18);
+        } else {
+          it.rectangle(bx, 352, 22, 18);
+          it.rectangle(bx + 1, 353, 20, 16);
+        }
+      }
+
+      float salt_pct = parse_num(id(softener_salt).state, 0.0f);
+      it.printf(452, 384, id(font_chakra_b15), "SOFTENER SALT: %s%%", fmt_int(id(softener_salt).state).c_str());
+      int salt_segs = static_cast<int>((salt_pct / 10.0f) + 0.5f);
+      for (int b = 0; b < 10; b++) {
+        int bx = 452 + b * 28;
+        if (b < salt_segs) {
+          it.filled_rectangle(bx, 408, 22, 18);
+        } else {
+          it.rectangle(bx, 408, 22, 18);
+          it.rectangle(bx + 1, 409, 20, 16);
+        }
+      }

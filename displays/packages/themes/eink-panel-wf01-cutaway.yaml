@@ -1,0 +1,341 @@
+# Theme WF-01: Architectural Property Cutaway x Meteogram Sky
+# Cross-section of 2F Loft, 1F Dining + Salt, B1 Crawlspace, Driveway + Model 3 Carport, and Cabana Pavilion
+
+font:
+  - file: "../config/fonts/BebasNeue-Regular.ttf"
+    id: font_bebas_64
+    size: 64
+    glyphs: [' ', '-', '°', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'F', '%']
+  - file: "../config/fonts/BebasNeue-Regular.ttf"
+    id: font_bebas_28
+    size: 28
+  - file: "../config/fonts/ShareTechMono-Regular.ttf"
+    id: font_mono_17
+    size: 17
+  - file: "../config/fonts/ShareTechMono-Regular.ttf"
+    id: font_mono_14
+    size: 14
+  - file: "../config/fonts/ShareTechMono-Regular.ttf"
+    id: font_mono_12
+    size: 12
+  - file: "../config/fonts/Montserrat-Black.ttf"
+    id: font_black_16
+    size: 16
+  - file: "../config/fonts/GothamRnd-Bold.ttf"
+    id: font_bold_14
+    size: 14
+  - file: "../config/fonts/GothamRnd-Book.ttf"
+    id: font_book_13
+    size: 13
+  - file: "../config/fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi_46
+    size: 46
+    glyphs: &mdi-wf01-glyphs
+      - "\U000F0590" # mdi-weather-cloudy
+      - "\U000F0F2F" # mdi-weather-cloudy-alert
+      - "\U000F0E6E" # mdi-weather-cloudy-arrow-right
+      - "\U000F0591" # mdi-weather-fog
+      - "\U000F0592" # mdi-weather-hail
+      - "\U000F0F30" # mdi-weather-hazy
+      - "\U000F0898" # mdi-weather-hurricane
+      - "\U000F0593" # mdi-weather-lightning
+      - "\U000F067E" # mdi-weather-lightning-rainy
+      - "\U000F0594" # mdi-weather-night
+      - "\U000F0F31" # mdi-weather-night-partly-cloudy
+      - "\U000F0595" # mdi-weather-partly-cloudy
+      - "\U000F0F32" # mdi-weather-partly-lightning
+      - "\U000F0F33" # mdi-weather-partly-rainy
+      - "\U000F0F34" # mdi-weather-partly-snowy
+      - "\U000F0F35" # mdi-weather-partly-snowy-rainy
+      - "\U000F0596" # mdi-weather-pouring
+      - "\U000F0597" # mdi-weather-rainy
+      - "\U000F0598" # mdi-weather-snowy
+      - "\U000F0F36" # mdi-weather-snowy-heavy
+      - "\U000F067F" # mdi-weather-snowy-rainy
+      - "\U000F0599" # mdi-weather-sunny
+      - "\U000F0F37" # mdi-weather-sunny-alert
+      - "\U000F14E4" # mdi-weather-sunny-off
+      - "\U000F059A" # mdi-weather-sunset
+      - "\U000F059B" # mdi-weather-sunset-down
+      - "\U000F059C" # mdi-weather-sunset-up
+      - "\U000F0F38" # mdi-weather-tornado
+      - "\U000F059D" # mdi-weather-windy
+      - "\U000F059E" # mdi-weather-windy-variant
+      - "\U000F010B" # mdi-car
+      - "\U000F078D" # mdi-waves
+  - file: "../config/fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi_20
+    size: 20
+    glyphs: *mdi-wf01-glyphs
+
+display:
+  - id: !extend display_panel
+    update_interval: never
+    lambda: |-
+      ESP_LOGD("Display", "Updating Display (Theme WF-01: Architectural Cutaway)...");
+      if (id(wifi_status) == 0) {
+        return;
+      }
+
+      auto get_weather_icon = [](const std::string &cond) -> const char * {
+        if (cond == "sunny" || cond == "clear") return "\U000F0599";
+        if (cond == "clear-night" || cond == "night") return "\U000F0594";
+        if (cond == "partlycloudy" || cond == "partly-cloudy") return "\U000F0595";
+        if (cond == "rainy" || cond == "partly-rainy") return "\U000F0597";
+        if (cond == "pouring") return "\U000F0596";
+        if (cond == "lightning" || cond == "lightning-rainy") return "\U000F0593";
+        if (cond == "snowy" || cond == "snowy-rainy") return "\U000F0598";
+        if (cond == "windy" || cond == "windy-variant") return "\U000F059D";
+        if (cond == "fog" || cond == "hazy") return "\U000F0591";
+        return "\U000F0590";
+      };
+
+      auto to_upper = [](std::string s) -> std::string {
+        for (char &c : s) {
+          if (c >= 'a' && c <= 'z') c = c - 'a' + 'A';
+        }
+        return s;
+      };
+
+      auto fmt_int = [](const std::string &s, const char *fallback = "--") -> std::string {
+        if (s.empty() || s == "unavailable" || s == "unknown") return fallback;
+        char *end = nullptr;
+        float val = std::strtof(s.c_str(), &end);
+        if (end == s.c_str()) return fallback;
+        char buf[16];
+        std::snprintf(buf, sizeof(buf), "%.0f", val);
+        return std::string(buf);
+      };
+
+      auto parse_num = [](const std::string &s, float def_val = 0.0f) -> float {
+        if (s.empty() || s == "unavailable" || s == "unknown") return def_val;
+        char *end = nullptr;
+        float val = std::strtof(s.c_str(), &end);
+        return (end == s.c_str()) ? def_val : val;
+      };
+
+      auto draw_thick_line = [&](int x0, int y0, int x1, int y1, int w) {
+        for (int o = -(w / 2); o <= (w / 2); o++) {
+          if (std::abs(x1 - x0) >= std::abs(y1 - y0)) {
+            it.line(x0, y0 + o, x1, y1 + o);
+          } else {
+            it.line(x0 + o, y0, x1 + o, y1);
+          }
+        }
+      };
+
+      // Outer Blueprint Frame + Top Black Title Bar
+      it.rectangle(10, 10, 780, 460);
+      it.rectangle(11, 11, 778, 458);
+      it.filled_rectangle(14, 14, 772, 36);
+      it.print(26, 21, id(font_mono_17), COLOR_OFF, "WOODGREEN ARCHITECTURAL TELEMETRY // SECTION VIEW");
+
+      auto time_now = id(homeassistant_time).now();
+      std::string uv_raw = id(uv).state;
+      if (uv_raw.empty() || uv_raw == "unavailable" || uv_raw == "unknown") uv_raw = id(weather_uv).state;
+      float uv_val = parse_num(uv_raw, 0.0f);
+      if (time_now.is_valid()) {
+        char d_buf[24];
+        time_now.strftime(d_buf, sizeof(d_buf), "%a %b %d");
+        it.printf(774, 22, id(font_mono_14), COLOR_OFF, TextAlign::TOP_RIGHT, "%s • AQI %s • UV %.1f",
+                  to_upper(d_buf).c_str(), fmt_int(id(aqi).state).c_str(), uv_val);
+      }
+
+      // Sky Zone (y=56..146): Current Weather + 5-Day Summary (Left) | Smooth Hourly Curve (Right)
+      it.printf(24, 56, id(font_bebas_64), "%s°F", fmt_int(id(temp).state).c_str());
+      it.printf(150, 86, id(font_mdi_46), TextAlign::CENTER, "%s", get_weather_icon(id(myWeather).state));
+
+      std::string cond_u = to_upper(id(myWeather).state);
+      if (cond_u == "PARTLYCLOUDY") cond_u = "PARTLY CLOUDY";
+      it.printf(184, 60, id(font_mono_14), "%s • %s%% OUT RH • %s MPH",
+                cond_u.c_str(), fmt_int(id(humi).state).c_str(), fmt_int(id(wind).state).c_str());
+
+      std::string input = id(forecast).state;
+      int y_line = 82;
+      size_t idx = 0;
+      int lines_printed = 0;
+      while (idx < input.length() && lines_printed < 3) {
+        size_t line_end = idx + 44;
+        if (line_end >= input.length()) {
+          it.print(184, y_line, id(font_book_13), input.substr(idx).c_str());
+          break;
+        }
+        size_t space = input.rfind(' ', line_end);
+        if (space == std::string::npos || space <= idx) space = line_end;
+        it.print(184, y_line, id(font_book_13), input.substr(idx, space - idx).c_str());
+        idx = space + 1;
+        y_line += 17;
+        lines_printed++;
+      }
+
+      // Hourly Trajectory Curve in Right Sky (x=516..748)
+      std::string col_time[5] = {
+        "NOW",
+        id(weather_timestamp_0).state,
+        id(weather_timestamp_1).state,
+        id(weather_timestamp_2).state,
+        id(weather_timestamp_3).state
+      };
+      std::string col_cond[5] = {
+        id(myWeather).state,
+        id(weather_condition_0).state,
+        id(weather_condition_1).state,
+        id(weather_condition_2).state,
+        id(weather_condition_3).state
+      };
+      float col_temp[5] = {
+        parse_num(id(temp).state, 75.0f),
+        parse_num(id(weather_temperature_0).state, 75.0f),
+        parse_num(id(weather_temperature_1).state, 75.0f),
+        parse_num(id(weather_temperature_2).state, 75.0f),
+        parse_num(id(weather_temperature_3).state, 75.0f)
+      };
+
+      float t_min = col_temp[0], t_max = col_temp[0];
+      for (int i = 1; i < 5; i++) {
+        if (col_temp[i] < t_min) t_min = col_temp[i];
+        if (col_temp[i] > t_max) t_max = col_temp[i];
+      }
+      float t_span = (t_max - t_min < 5.0f) ? 5.0f : (t_max - t_min);
+
+      int hx_pts[5], hy_pts[5];
+      for (int i = 0; i < 5; i++) {
+        hx_pts[i] = 516 + i * 58;
+        hy_pts[i] = 114 - static_cast<int>(((col_temp[i] - t_min) / t_span) * 18.0f);
+      }
+      for (int i = 0; i < 4; i++) {
+        draw_thick_line(hx_pts[i], hy_pts[i], hx_pts[i + 1], hy_pts[i + 1], 2);
+      }
+      for (int i = 0; i < 5; i++) {
+        it.filled_circle(hx_pts[i], hy_pts[i], 3);
+        it.printf(hx_pts[i], 62, id(font_mono_12), TextAlign::TOP_CENTER, "%s", col_time[i].c_str());
+        it.printf(hx_pts[i], 84, id(font_mdi_20), TextAlign::CENTER, "%s", get_weather_icon(col_cond[i]));
+        it.printf(hx_pts[i], hy_pts[i] + 8, id(font_bold_14), TextAlign::TOP_CENTER, "%.0f°", col_temp[i]);
+      }
+
+      it.line(14, 146, 786, 146);
+
+      // Architectural Cross-Section (y=152..386)
+      it.filled_rectangle(22, 333, 756, 3); // Ground line
+      for (int y = 336; y < 386; y += 2) {
+        for (int x = 22; x < 778; x += 2) {
+          it.draw_pixel_at(x, y);
+        }
+      }
+
+      // Left Wing: Driveway + Carport with Tesla Model 3
+      it.rectangle(36, 158, 178, 40);
+      it.rectangle(37, 159, 176, 38);
+      it.print(125, 163, id(font_mono_12), TextAlign::TOP_CENTER, "DRIVEWAY (OUT)");
+      it.printf(125, 178, id(font_bold_14), TextAlign::TOP_CENTER, "%s°F • %s%% RH",
+                fmt_int(id(driveway_temp).state).c_str(), fmt_int(id(driveway_humi).state).c_str());
+
+      draw_thick_line(28, 222, 228, 204, 3); // Carport roof
+      it.filled_rectangle(35, 222, 2, 112);
+      it.filled_rectangle(48, 232, 166, 92);
+      it.print(60, 242, id(font_mono_14), COLOR_OFF, "MODEL 3");
+      it.printf(200, 238, id(font_bebas_28), COLOR_OFF, TextAlign::TOP_RIGHT, "%s%%", fmt_int(id(ev_battery).state).c_str());
+      it.printf(60, 268, id(font_book_13), COLOR_OFF, "Range: %s mi", fmt_int(id(ev_range).state).c_str());
+      float ev_pct = parse_num(id(ev_battery).state, 0.0f);
+      it.rectangle(60, 294, 140, 14, COLOR_OFF);
+      int ev_w = static_cast<int>(136.0f * (ev_pct / 100.0f));
+      if (ev_w > 0) it.filled_rectangle(62, 296, ev_w, 10, COLOR_OFF);
+
+      // Center Main House: Pitched Roof + 2F Loft + 1F Dining + B1 Crawlspace
+      draw_thick_line(224, 204, 380, 152, 3);
+      draw_thick_line(380, 152, 536, 204, 3);
+      draw_thick_line(224, 204, 536, 204, 3);
+
+      it.filled_rectangle(234, 204, 292, 130, COLOR_OFF);
+      it.rectangle(234, 204, 292, 130);
+      it.rectangle(235, 205, 290, 128);
+      it.filled_rectangle(234, 267, 292, 2);
+
+      // 2F Loft
+      it.print(250, 214, id(font_mono_14), "2F // LOFT");
+      it.printf(510, 212, id(font_black_16), TextAlign::TOP_RIGHT, "%s°F • %s%% RH",
+                fmt_int(id(loft_temp).state).c_str(), fmt_int(id(loft_humi).state).c_str());
+      float loft_rh = parse_num(id(loft_humi).state, 0.0f);
+      it.rectangle(250, 242, 260, 12);
+      it.filled_rectangle(252, 244, static_cast<int>(256.0f * (loft_rh / 100.0f)), 8);
+
+      // 1F Dining + Water Softener
+      it.print(250, 276, id(font_mono_14), "1F // DINING");
+      it.printf(510, 274, id(font_black_16), TextAlign::TOP_RIGHT, "%s°F • %s%% RH",
+                fmt_int(id(dining_temp).state).c_str(), fmt_int(id(dining_humi).state).c_str());
+      float din_rh = parse_num(id(dining_humi).state, 0.0f);
+      it.rectangle(250, 304, 162, 12);
+      it.filled_rectangle(252, 306, static_cast<int>(158.0f * (din_rh / 100.0f)), 8);
+      it.printf(510, 304, id(font_mono_14), TextAlign::TOP_RIGHT, "Salt: %s%%", fmt_int(id(softener_salt).state).c_str());
+
+      // B1 Crawlspace (Below ground)
+      it.filled_rectangle(234, 334, 292, 52, COLOR_OFF);
+      it.rectangle(234, 334, 292, 52);
+      it.rectangle(235, 335, 290, 50);
+      it.print(250, 350, id(font_mono_14), "B1 // CRAWL");
+      it.printf(510, 348, id(font_black_16), TextAlign::TOP_RIGHT, "%s°F • %s%% RH",
+                fmt_int(id(crawlspace_temp).state).c_str(), fmt_int(id(crawlspace_humi).state).c_str());
+
+      // Right Wing: Backyard Callout + Cabana Pavilion
+      it.rectangle(548, 158, 218, 48);
+      it.rectangle(549, 159, 216, 46);
+      it.print(562, 165, id(font_mono_14), "BACKYARD (OUT)");
+      it.printf(752, 164, id(font_black_16), TextAlign::TOP_RIGHT, "%s°F", fmt_int(id(backyard_temp).state).c_str());
+      it.printf(562, 184, id(font_bold_14), "Humidity: %s%% RH", fmt_int(id(backyard_humi).state).c_str());
+
+      draw_thick_line(546, 242, 657, 214, 3);
+      draw_thick_line(657, 214, 768, 242, 3);
+      draw_thick_line(546, 242, 768, 242, 3);
+      it.filled_rectangle(556, 242, 202, 92, COLOR_OFF);
+      it.rectangle(556, 242, 202, 92);
+      it.rectangle(557, 243, 200, 90);
+      it.print(657, 252, id(font_mono_14), TextAlign::TOP_CENTER, "CABANA PAVILION");
+      it.printf(657, 274, id(font_black_16), TextAlign::TOP_CENTER, "%s°F • %s%% RH",
+                fmt_int(id(cabana_temp).state).c_str(), fmt_int(id(cabana_humi).state).c_str());
+      float cab_rh = parse_num(id(cabana_humi).state, 0.0f);
+      it.rectangle(576, 306, 162, 12);
+      it.filled_rectangle(578, 308, static_cast<int>(158.0f * (cab_rh / 100.0f)), 8);
+
+      // Bottom Black Blueprint Footer (y=394..462)
+      it.filled_rectangle(22, 394, 756, 68);
+      it.print(38, 406, id(font_mono_14), COLOR_OFF, "WORK (ROSE AVE)");
+      it.printf(260, 398, id(font_bebas_28), COLOR_OFF, TextAlign::TOP_RIGHT, "%s MIN", fmt_int(id(work_travel_time).state).c_str());
+      it.print(38, 434, id(font_mono_14), COLOR_OFF, "WISH (CENTINELA)");
+      it.printf(260, 426, id(font_bebas_28), COLOR_OFF, TextAlign::TOP_RIGHT, "%s MIN", fmt_int(id(wish_travel_time).state).c_str());
+
+      it.line(284, 402, 284, 454, COLOR_OFF);
+      it.print(304, 406, id(font_mono_14), COLOR_OFF, "SANTA MONICA TIDES");
+
+      std::string t_state = id(tides_state).state;
+      std::string tide_time = t_state;
+      size_t at_pos = t_state.find(" at ");
+      if (at_pos != std::string::npos) tide_time = t_state.substr(at_pos + 4);
+
+      auto fmt_iso_time = [](const std::string &iso) -> std::string {
+        size_t t_pos = iso.find('T');
+        if (t_pos == std::string::npos || iso.length() < t_pos + 6) return "";
+        int hh = std::atoi(iso.substr(t_pos + 1, 2).c_str());
+        std::string mm = iso.substr(t_pos + 4, 2);
+        const char *ampm = (hh >= 12) ? "PM" : "AM";
+        int h12 = hh % 12;
+        if (h12 == 0) h12 = 12;
+        char buf[16];
+        std::snprintf(buf, sizeof(buf), "%d:%s %s", h12, mm.c_str(), ampm);
+        return std::string(buf);
+      };
+      std::string lo_str = fmt_iso_time(id(low_tide_time).state);
+      it.printf(304, 432, id(font_bold_14), COLOR_OFF, "HI %s  •  LO %s", tide_time.c_str(), lo_str.c_str());
+
+      int w_prev_x = 560;
+      int w_prev_y = 428 - static_cast<int>(15.0f * std::sin((-0.08f) * 1.8f * 3.14159265f));
+      for (int px = 564; px <= 760; px += 4) {
+        float t = static_cast<float>(px - 560) / 200.0f;
+        int py = 428 - static_cast<int>(15.0f * std::sin((t - 0.08f) * 1.8f * 3.14159265f));
+        it.line(w_prev_x, w_prev_y, px, py, COLOR_OFF);
+        it.line(w_prev_x, w_prev_y + 1, px, py + 1, COLOR_OFF);
+        if (px == 624) {
+          it.filled_circle(px, py, 4, COLOR_OFF);
+        }
+        w_prev_x = px;
+        w_prev_y = py;
+      }

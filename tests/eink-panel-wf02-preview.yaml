@@ -1,0 +1,6 @@
+packages:
+  preview_base: !include eink-panel-preview-base.yaml
+  display_ui: !include ../displays/packages/themes/eink-panel-wf02-splitflap.yaml
+
+esphome:
+  name: eink-panel-wf02-preview

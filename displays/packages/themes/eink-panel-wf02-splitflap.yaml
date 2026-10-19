@@ -1,0 +1,263 @@
+# Theme WF-02: Solari Split-Flap x JR Express Departure Board
+# Mechanical split-flap tiles with horizontal hinge lines + 6-car climate consist
+
+font:
+  - file: "../config/fonts/BebasNeue-Regular.ttf"
+    id: font_bebas_34
+    size: 34
+  - file: "../config/fonts/BebasNeue-Regular.ttf"
+    id: font_bebas_28
+    size: 28
+  - file: "../config/fonts/BebasNeue-Regular.ttf"
+    id: font_bebas_24
+    size: 24
+  - file: "../config/fonts/ShareTechMono-Regular.ttf"
+    id: font_mono_14
+    size: 14
+  - file: "../config/fonts/ShareTechMono-Regular.ttf"
+    id: font_mono_12
+    size: 12
+  - file: "../config/fonts/GothamRnd-Book.ttf"
+    id: font_book_13
+    size: 13
+  - file: "../config/fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi_26
+    size: 26
+    glyphs: &mdi-wf02-glyphs
+      - "\U000F0590" # mdi-weather-cloudy
+      - "\U000F0F2F" # mdi-weather-cloudy-alert
+      - "\U000F0E6E" # mdi-weather-cloudy-arrow-right
+      - "\U000F0591" # mdi-weather-fog
+      - "\U000F0592" # mdi-weather-hail
+      - "\U000F0F30" # mdi-weather-hazy
+      - "\U000F0898" # mdi-weather-hurricane
+      - "\U000F0593" # mdi-weather-lightning
+      - "\U000F067E" # mdi-weather-lightning-rainy
+      - "\U000F0594" # mdi-weather-night
+      - "\U000F0F31" # mdi-weather-night-partly-cloudy
+      - "\U000F0595" # mdi-weather-partly-cloudy
+      - "\U000F0F32" # mdi-weather-partly-lightning
+      - "\U000F0F33" # mdi-weather-partly-rainy
+      - "\U000F0F34" # mdi-weather-partly-snowy
+      - "\U000F0F35" # mdi-weather-partly-snowy-rainy
+      - "\U000F0596" # mdi-weather-pouring
+      - "\U000F0597" # mdi-weather-rainy
+      - "\U000F0598" # mdi-weather-snowy
+      - "\U000F0F36" # mdi-weather-snowy-heavy
+      - "\U000F067F" # mdi-weather-snowy-rainy
+      - "\U000F0599" # mdi-weather-sunny
+      - "\U000F0F37" # mdi-weather-sunny-alert
+      - "\U000F14E4" # mdi-weather-sunny-off
+      - "\U000F059A" # mdi-weather-sunset
+      - "\U000F059B" # mdi-weather-sunset-down
+      - "\U000F059C" # mdi-weather-sunset-up
+      - "\U000F0F38" # mdi-weather-tornado
+      - "\U000F059D" # mdi-weather-windy
+      - "\U000F059E" # mdi-weather-windy-variant
+
+display:
+  - id: !extend display_panel
+    update_interval: never
+    lambda: |-
+      ESP_LOGD("Display", "Updating Display (Theme WF-02: Solari Split-Flap)...");
+      if (id(wifi_status) == 0) {
+        return;
+      }
+
+      auto get_weather_icon = [](const std::string &cond) -> const char * {
+        if (cond == "sunny" || cond == "clear") return "\U000F0599";
+        if (cond == "clear-night" || cond == "night") return "\U000F0594";
+        if (cond == "partlycloudy" || cond == "partly-cloudy") return "\U000F0595";
+        if (cond == "rainy" || cond == "partly-rainy") return "\U000F0597";
+        if (cond == "pouring") return "\U000F0596";
+        if (cond == "lightning" || cond == "lightning-rainy") return "\U000F0593";
+        if (cond == "snowy" || cond == "snowy-rainy") return "\U000F0598";
+        if (cond == "windy" || cond == "windy-variant") return "\U000F059D";
+        if (cond == "fog" || cond == "hazy") return "\U000F0591";
+        return "\U000F0590";
+      };
+
+      auto to_upper = [](std::string s) -> std::string {
+        for (char &c : s) {
+          if (c >= 'a' && c <= 'z') c = c - 'a' + 'A';
+        }
+        return s;
+      };
+
+      auto fmt_int = [](const std::string &s, const char *fallback = "--") -> std::string {
+        if (s.empty() || s == "unavailable" || s == "unknown") return fallback;
+        char *end = nullptr;
+        float val = std::strtof(s.c_str(), &end);
+        if (end == s.c_str()) return fallback;
+        char buf[16];
+        std::snprintf(buf, sizeof(buf), "%.0f", val);
+        return std::string(buf);
+      };
+
+      auto parse_num = [](const std::string &s, float def_val = 0.0f) -> float {
+        if (s.empty() || s == "unavailable" || s == "unknown") return def_val;
+        char *end = nullptr;
+        float val = std::strtof(s.c_str(), &end);
+        return (end == s.c_str()) ? def_val : val;
+      };
+
+      auto draw_flap_string = [&](int x, int y, const std::string &text, int cw, int ch, esphome::display::BaseFont *fnt) {
+        for (size_t i = 0; i < text.length(); i++) {
+          int fx = x + static_cast<int>(i) * (cw + 3);
+          it.filled_rectangle(fx, y, cw, ch);
+          char ch_buf[2] = {text[i], '\0'};
+          it.print(fx + cw / 2, y + ch / 2, fnt, COLOR_OFF, TextAlign::CENTER, ch_buf);
+          it.line(fx, y + ch / 2, fx + cw - 1, y + ch / 2, COLOR_OFF);
+        }
+      };
+
+      // Outer Frame & Top Header Bar
+      it.rectangle(10, 10, 780, 460);
+      it.rectangle(11, 11, 778, 458);
+      it.filled_rectangle(10, 10, 780, 46);
+      it.filled_rectangle(22, 18, 54, 30, COLOR_OFF);
+      it.print(49, 33, id(font_bebas_24), COLOR_ON, TextAlign::CENTER, "WG-01");
+      it.print(90, 18, id(font_bebas_28), COLOR_OFF, "WOODGREEN // SPLIT-FLAP TELEMETRY");
+
+      auto time_now = id(homeassistant_time).now();
+      std::string uv_raw = id(uv).state;
+      if (uv_raw.empty() || uv_raw == "unavailable" || uv_raw == "unknown") uv_raw = id(weather_uv).state;
+      float uv_val = parse_num(uv_raw, 0.0f);
+      if (time_now.is_valid()) {
+        char d_buf[24];
+        time_now.strftime(d_buf, sizeof(d_buf), "%a %d %b");
+        it.printf(774, 22, id(font_mono_14), COLOR_OFF, TextAlign::TOP_RIGHT, "%s • AQI %s • UV %.1f",
+                  to_upper(d_buf).c_str(), fmt_int(id(aqi).state).c_str(), uv_val);
+      }
+
+      // Top Section (y=66..190): Weather Flap + 5-Day Summary (Left) | 5 Hourly Flaps (Right)
+      std::string cond_u = to_upper(id(myWeather).state);
+      if (cond_u.length() > 6) cond_u = cond_u.substr(0, 6);
+      std::string hero_flap = fmt_int(id(temp).state) + "F " + cond_u;
+      draw_flap_string(26, 68, hero_flap, 26, 42, id(font_bebas_34));
+      it.printf(26, 118, id(font_mono_14), "OUTSIDE: %s%% RH  •  WIND: %s MPH",
+                fmt_int(id(humi).state).c_str(), fmt_int(id(wind).state).c_str());
+
+      std::string input = id(forecast).state;
+      int y_line = 140;
+      size_t idx = 0;
+      int lines_printed = 0;
+      while (idx < input.length() && lines_printed < 3) {
+        size_t line_end = idx + 52;
+        if (line_end >= input.length()) {
+          it.print(26, y_line, id(font_book_13), input.substr(idx).c_str());
+          break;
+        }
+        size_t space = input.rfind(' ', line_end);
+        if (space == std::string::npos || space <= idx) space = line_end;
+        it.print(26, y_line, id(font_book_13), input.substr(idx, space - idx).c_str());
+        idx = space + 1;
+        y_line += 17;
+        lines_printed++;
+      }
+
+      it.filled_rectangle(404, 64, 2, 126);
+      it.print(420, 66, id(font_mono_12), "HOURLY FORECAST FLAPS");
+
+      std::string col_time[5] = {
+        "NOW",
+        id(weather_timestamp_0).state,
+        id(weather_timestamp_1).state,
+        id(weather_timestamp_2).state,
+        id(weather_timestamp_3).state
+      };
+      std::string col_cond[5] = {
+        id(myWeather).state,
+        id(weather_condition_0).state,
+        id(weather_condition_1).state,
+        id(weather_condition_2).state,
+        id(weather_condition_3).state
+      };
+      std::string col_temp[5] = {
+        fmt_int(id(temp).state),
+        fmt_int(id(weather_temperature_0).state),
+        fmt_int(id(weather_temperature_1).state),
+        fmt_int(id(weather_temperature_2).state),
+        fmt_int(id(weather_temperature_3).state)
+      };
+
+      for (int i = 0; i < 5; i++) {
+        int cx = 420 + i * 72 + 28;
+        it.printf(cx, 86, id(font_mono_12), TextAlign::TOP_CENTER, "%s", col_time[i].c_str());
+        it.printf(cx, 118, id(font_mdi_26), TextAlign::CENTER, "%s", get_weather_icon(col_cond[i]));
+        draw_flap_string(cx - 26, 140, col_temp[i], 24, 36, id(font_bebas_28));
+      }
+
+      it.filled_rectangle(10, 196, 780, 2);
+
+      // Middle Section (y=204..346): 6-Car Split-Flap Climate Consist
+      it.print(26, 204, id(font_mono_12), "6-ZONE CLIMATE CONSIST // INDOOR (1-3) & PERIMETER (4-6)");
+      const char *z_caps[6] = {"DINING", "LOFT", "CRAWL", "CABANA", "DRIVE", "YARD"};
+      const char *z_kind[6] = {"IN", "IN", "IN", "OUT", "OUT", "OUT"};
+      std::string z_temps[6] = {
+        fmt_int(id(dining_temp).state),
+        fmt_int(id(loft_temp).state),
+        fmt_int(id(crawlspace_temp).state),
+        fmt_int(id(cabana_temp).state),
+        fmt_int(id(driveway_temp).state),
+        fmt_int(id(backyard_temp).state)
+      };
+      float z_rh[6] = {
+        parse_num(id(dining_humi).state, 0.0f),
+        parse_num(id(loft_humi).state, 0.0f),
+        parse_num(id(crawlspace_humi).state, 0.0f),
+        parse_num(id(cabana_humi).state, 0.0f),
+        parse_num(id(driveway_humi).state, 0.0f),
+        parse_num(id(backyard_humi).state, 0.0f)
+      };
+
+      int zw = 122;
+      for (int i = 0; i < 6; i++) {
+        int zx = 26 + i * zw;
+        it.rectangle(zx, 226, zw - 8, 110);
+        it.rectangle(zx + 1, 227, zw - 10, 108);
+        if (i < 3) {
+          it.filled_rectangle(zx, 226, zw - 8, 22);
+          it.printf(zx + (zw - 8) / 2, 237, id(font_mono_12), COLOR_OFF, TextAlign::CENTER, "%s • %s", z_caps[i], z_kind[i]);
+        } else {
+          it.rectangle(zx, 226, zw - 8, 22);
+          it.printf(zx + (zw - 8) / 2, 237, id(font_mono_12), COLOR_ON, TextAlign::CENTER, "%s • %s", z_caps[i], z_kind[i]);
+        }
+        draw_flap_string(zx + 8, 258, z_temps[i], 20, 32, id(font_bebas_24));
+        it.printf(zx + 104, 274, id(font_bebas_28), TextAlign::CENTER_RIGHT, "%.0f%%", z_rh[i]);
+        it.rectangle(zx + 10, 306, zw - 28, 12);
+        it.filled_rectangle(zx + 12, 308, static_cast<int>((zw - 32) * (z_rh[i] / 100.0f)), 8);
+      }
+
+      it.filled_rectangle(10, 348, 780, 2);
+
+      // Bottom Section (y=358..460): 4 Split-Flap Departure Modules
+      char w_buf[16], ws_buf[16], ev_buf[16];
+      std::snprintf(w_buf, sizeof(w_buf), "%02d MIN", static_cast<int>(parse_num(id(work_travel_time).state, 0.0f) + 0.5f));
+      std::snprintf(ws_buf, sizeof(ws_buf), "%02d MIN", static_cast<int>(parse_num(id(wish_travel_time).state, 0.0f) + 0.5f));
+      std::snprintf(ev_buf, sizeof(ev_buf), "%02d PCT", static_cast<int>(parse_num(id(ev_battery).state, 0.0f) + 0.5f));
+
+      const char *mod_lbls[4] = {
+        "WORK (ROSE AVE)",
+        "WISH (CENTINELA)",
+        "MODEL 3 (202 MI)",
+        "HI TIDE (LO 11:38)"
+      };
+      std::string mod_vals[4] = {
+        std::string(w_buf),
+        std::string(ws_buf),
+        std::string(ev_buf),
+        "03:29P"
+      };
+
+      int mw = 756 / 4;
+      for (int i = 0; i < 4; i++) {
+        int mx = 24 + i * mw;
+        if (i > 0) it.line(mx - 8, 356, mx - 8, 424);
+        it.print(mx, 358, id(font_mono_12), mod_lbls[i]);
+        draw_flap_string(mx, 380, mod_vals[i], 24, 36, id(font_bebas_28));
+      }
+
+      it.line(24, 428, 776, 428);
+      it.printf(24, 436, id(font_mono_12), "SOFTENER SALT LEVEL: %s%% [OK]  •  SANTA MONICA PIER STATION",
+                fmt_int(id(softener_salt).state).c_str());

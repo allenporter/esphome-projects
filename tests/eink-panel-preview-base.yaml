@@ -1,0 +1,305 @@
+substitutions:
+  preview_time: "2026-10-18 14:40:00"
+  preview_weather: "sunny"
+  preview_temp: "84"
+  preview_humi: "21"
+  preview_press: "29.96"
+  preview_wind: "6.03"
+  preview_weather_uv: "5.6"
+  preview_uv: "unavailable"
+  preview_uv_level: "moderate"
+  preview_forecast: "Sunny with highs in the 70s-80s through Tue. Rain expected Wed, followed by cooler, partly cloudy conditions Thu-Fri."
+  preview_ts_0: "1 PM"
+  preview_cond_0: "sunny"
+  preview_temp_0: "84"
+  preview_ts_1: "2 PM"
+  preview_cond_1: "sunny"
+  preview_temp_1: "83"
+  preview_ts_2: "3 PM"
+  preview_cond_2: "partlycloudy"
+  preview_temp_2: "81"
+  preview_ts_3: "4 PM"
+  preview_cond_3: "partlycloudy"
+  preview_temp_3: "79"
+  preview_dining_temp: "78.62"
+  preview_dining_humi: "47"
+  preview_loft_temp: "77.54"
+  preview_loft_humi: "40"
+  preview_crawlspace_temp: "80.1"
+  preview_crawlspace_humi: "31"
+  preview_cabana_temp: "73.4"
+  preview_cabana_humi: "68"
+  preview_driveway_temp: "84.2"
+  preview_driveway_humi: "52"
+  preview_backyard_temp: "87.4"
+  preview_backyard_humi: "43"
+  preview_aqi: "21"
+  preview_ev_battery: "79"
+  preview_ev_range: "201.62"
+  preview_ev_lock: "locked"
+  preview_work_time: "9.1"
+  preview_work_route: "Rose Ave Los Angeles"
+  preview_wish_time: "17.45"
+  preview_wish_route: "S Centinela Ave, Culver Blvd, W Manchester Ave Los Angeles"
+  preview_tides_state: "High tide at 3:29 PM"
+  preview_low_tide: "2026-10-18T23:38"
+  preview_high_tide: "2026-10-19T07:07"
+  preview_softener_salt: "63"
+  snapshot_filename: "eink-panel-preview.bmp"
+
+packages:
+  preview_common: !include preview-common.yaml
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+      - text_sensor.template.publish:
+          id: myWeather
+          state: "${preview_weather}"
+      - text_sensor.template.publish:
+          id: temp
+          state: "${preview_temp}"
+      - text_sensor.template.publish:
+          id: humi
+          state: "${preview_humi}"
+      - text_sensor.template.publish:
+          id: press
+          state: "${preview_press}"
+      - text_sensor.template.publish:
+          id: wind
+          state: "${preview_wind}"
+      - text_sensor.template.publish:
+          id: weather_uv
+          state: "${preview_weather_uv}"
+      - text_sensor.template.publish:
+          id: uv
+          state: "${preview_uv}"
+      - text_sensor.template.publish:
+          id: uv_level
+          state: "${preview_uv_level}"
+      - text_sensor.template.publish:
+          id: forecast
+          state: "${preview_forecast}"
+      - text_sensor.template.publish:
+          id: weather_timestamp_0
+          state: "${preview_ts_0}"
+      - text_sensor.template.publish:
+          id: weather_condition_0
+          state: "${preview_cond_0}"
+      - text_sensor.template.publish:
+          id: weather_temperature_0
+          state: "${preview_temp_0}"
+      - text_sensor.template.publish:
+          id: weather_timestamp_1
+          state: "${preview_ts_1}"
+      - text_sensor.template.publish:
+          id: weather_condition_1
+          state: "${preview_cond_1}"
+      - text_sensor.template.publish:
+          id: weather_temperature_1
+          state: "${preview_temp_1}"
+      - text_sensor.template.publish:
+          id: weather_timestamp_2
+          state: "${preview_ts_2}"
+      - text_sensor.template.publish:
+          id: weather_condition_2
+          state: "${preview_cond_2}"
+      - text_sensor.template.publish:
+          id: weather_temperature_2
+          state: "${preview_temp_2}"
+      - text_sensor.template.publish:
+          id: weather_timestamp_3
+          state: "${preview_ts_3}"
+      - text_sensor.template.publish:
+          id: weather_condition_3
+          state: "${preview_cond_3}"
+      - text_sensor.template.publish:
+          id: weather_temperature_3
+          state: "${preview_temp_3}"
+      - text_sensor.template.publish:
+          id: dining_temp
+          state: "${preview_dining_temp}"
+      - text_sensor.template.publish:
+          id: dining_humi
+          state: "${preview_dining_humi}"
+      - text_sensor.template.publish:
+          id: loft_temp
+          state: "${preview_loft_temp}"
+      - text_sensor.template.publish:
+          id: loft_humi
+          state: "${preview_loft_humi}"
+      - text_sensor.template.publish:
+          id: crawlspace_temp
+          state: "${preview_crawlspace_temp}"
+      - text_sensor.template.publish:
+          id: crawlspace_humi
+          state: "${preview_crawlspace_humi}"
+      - text_sensor.template.publish:
+          id: cabana_temp
+          state: "${preview_cabana_temp}"
+      - text_sensor.template.publish:
+          id: cabana_humi
+          state: "${preview_cabana_humi}"
+      - text_sensor.template.publish:
+          id: driveway_temp
+          state: "${preview_driveway_temp}"
+      - text_sensor.template.publish:
+          id: driveway_humi
+          state: "${preview_driveway_humi}"
+      - text_sensor.template.publish:
+          id: backyard_temp
+          state: "${preview_backyard_temp}"
+      - text_sensor.template.publish:
+          id: backyard_humi
+          state: "${preview_backyard_humi}"
+      - text_sensor.template.publish:
+          id: aqi
+          state: "${preview_aqi}"
+      - text_sensor.template.publish:
+          id: ev_battery
+          state: "${preview_ev_battery}"
+      - text_sensor.template.publish:
+          id: ev_range
+          state: "${preview_ev_range}"
+      - text_sensor.template.publish:
+          id: ev_lock
+          state: "${preview_ev_lock}"
+      - text_sensor.template.publish:
+          id: work_travel_time
+          state: "${preview_work_time}"
+      - text_sensor.template.publish:
+          id: work_route
+          state: "${preview_work_route}"
+      - text_sensor.template.publish:
+          id: wish_travel_time
+          state: "${preview_wish_time}"
+      - text_sensor.template.publish:
+          id: wish_route
+          state: "${preview_wish_route}"
+      - text_sensor.template.publish:
+          id: tides_state
+          state: "${preview_tides_state}"
+      - text_sensor.template.publish:
+          id: low_tide_time
+          state: "${preview_low_tide}"
+      - text_sensor.template.publish:
+          id: high_tide_time
+          state: "${preview_high_tide}"
+      - text_sensor.template.publish:
+          id: softener_salt
+          state: "${preview_softener_salt}"
+      - component.update: display_panel
+      - snapshot.take:
+          id: display_panel
+          filename: "${snapshot_filename}"
+      - lambda: |-
+          std::exit(0);
+
+globals:
+  - id: wifi_status
+    type: int
+    restore_value: no
+    initial_value: '1'
+
+time:
+  - platform: host
+    id: homeassistant_time
+    timezone: "UTC"
+
+text_sensor:
+  - platform: template
+    id: myWeather
+  - platform: template
+    id: temp
+  - platform: template
+    id: humi
+  - platform: template
+    id: press
+  - platform: template
+    id: wind
+  - platform: template
+    id: weather_uv
+  - platform: template
+    id: uv
+  - platform: template
+    id: uv_level
+  - platform: template
+    id: forecast
+  - platform: template
+    id: weather_timestamp_0
+  - platform: template
+    id: weather_condition_0
+  - platform: template
+    id: weather_temperature_0
+  - platform: template
+    id: weather_timestamp_1
+  - platform: template
+    id: weather_condition_1
+  - platform: template
+    id: weather_temperature_1
+  - platform: template
+    id: weather_timestamp_2
+  - platform: template
+    id: weather_condition_2
+  - platform: template
+    id: weather_temperature_2
+  - platform: template
+    id: weather_timestamp_3
+  - platform: template
+    id: weather_condition_3
+  - platform: template
+    id: weather_temperature_3
+  - platform: template
+    id: dining_temp
+  - platform: template
+    id: dining_humi
+  - platform: template
+    id: loft_temp
+  - platform: template
+    id: loft_humi
+  - platform: template
+    id: crawlspace_temp
+  - platform: template
+    id: crawlspace_humi
+  - platform: template
+    id: cabana_temp
+  - platform: template
+    id: cabana_humi
+  - platform: template
+    id: driveway_temp
+  - platform: template
+    id: driveway_humi
+  - platform: template
+    id: backyard_temp
+  - platform: template
+    id: backyard_humi
+  - platform: template
+    id: aqi
+  - platform: template
+    id: ev_battery
+  - platform: template
+    id: ev_range
+  - platform: template
+    id: ev_lock
+  - platform: template
+    id: work_travel_time
+  - platform: template
+    id: work_route
+  - platform: template
+    id: wish_travel_time
+  - platform: template
+    id: wish_route
+  - platform: template
+    id: tides_state
+  - platform: template
+    id: low_tide_time
+  - platform: template
+    id: high_tide_time
+  - platform: template
+    id: softener_salt
+
+display:
+  - platform: snapshot
+    id: display_panel
+    dimensions: 800x480
