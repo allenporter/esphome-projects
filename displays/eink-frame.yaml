@@ -20,6 +20,9 @@ ota:
   - platform: esphome
     password: !secret ota_password
 
+bluetooth_proxy:
+  active: true
+
 json:
 
 esphome:

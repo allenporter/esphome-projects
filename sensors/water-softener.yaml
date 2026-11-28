@@ -33,6 +33,9 @@ ota:
   - platform: esphome
     password: !secret ota_password
 
+bluetooth_proxy:
+  active: true
+
 
 # The AHT10 is an i2c based temperature and humidity sensor.
 # See data sheet:
